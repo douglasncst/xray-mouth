@@ -32,21 +32,24 @@ class LayoutGeometry:
 
 
 def default_geometry() -> LayoutGeometry:
-    top = {number: Rect(0.04 + (number - 1) * 0.185, 0.06, 0.17, 0.30) for number in range(1, 6)}
+    top = {number: Rect(0.05 + (number - 1) * 0.19, 0.06, 0.17, 0.27) for number in range(1, 6)}
     lower = {
-        number: Rect(0.04 + (number - 10) * 0.185, 0.64, 0.17, 0.30) for number in range(10, 15)
+        number: Rect(0.05 + (number - 10) * 0.19, 0.72, 0.17, 0.22) for number in range(10, 15)
     }
     sides = {
-        6: Rect(0.05, 0.40, 0.17, 0.09),
-        7: Rect(0.05, 0.51, 0.17, 0.09),
-        8: Rect(0.78, 0.40, 0.17, 0.09),
-        9: Rect(0.78, 0.51, 0.17, 0.09),
+        6: Rect(0.02, 0.40, 0.10, 0.13),
+        7: Rect(0.02, 0.55, 0.10, 0.13),
+        8: Rect(0.88, 0.40, 0.10, 0.13),
+        9: Rect(0.88, 0.55, 0.10, 0.13),
     }
-    return LayoutGeometry(slots=top | lower | sides, center=Rect(0.27, 0.40, 0.46, 0.16))
+    return LayoutGeometry(slots=top | lower | sides, center=Rect(0.20, 0.41, 0.60, 0.22))
 
 
 def _font(size: int) -> ImageFont.ImageFont:
-    return ImageFont.load_default(size=size)
+    try:
+        return ImageFont.truetype("DejaVuSans.ttf", size=size)
+    except OSError:
+        return ImageFont.load_default(size=size)
 
 
 def build_series_image(

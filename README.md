@@ -38,6 +38,8 @@ Run a synthetic demo without patient data:
 xray-mouth --patient "Demo Patient" --input ./demo_images --output-root ./reports --demo
 ```
 
+On Windows, `run_windows.bat` runs the local source tree using an existing `.venv` when available (or Python 3 from the launcher). It never installs Python or dependencies; it explains what is missing and keeps the terminal open on errors.
+
 ## File naming
 
 Prefix each image with its two-digit slot number, for example:
@@ -52,7 +54,7 @@ The default 14-position protocol is: superior posterior right, superior anterior
 
 ## Outputs
 
-Every run writes a new directory such as `reports/xray-mouth-20260930-153012/` containing:
+Every run writes a new directory such as `reports/Patient_Name_2026-09-30_15-30-12/` containing:
 
 - `periapical_series_preview.png`
 - `periapical_series_600dpi.png`
@@ -78,6 +80,8 @@ pytest
 ```
 
 See [architecture](docs/architecture.md), [hardware integration](docs/hardware-integration.md), and [contributing](CONTRIBUTING.md).
+
+XRay Mouth is released under the [MIT License](LICENSE).
 
 ## Roadmap
 

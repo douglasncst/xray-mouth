@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 
@@ -15,13 +17,25 @@ from xray_mouth.imaging import map_radiographs
 from xray_mouth.layout import build_series_image
 from xray_mouth.reporting import write_report
 
+WINDOWS_INVALID_FILENAME = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
-def timestamped_result_directory(output_root: Path, timestamp: datetime | None = None) -> Path:
-    stamp = (timestamp or datetime.now()).strftime("%Y%m%d-%H%M%S")
-    candidate = output_root / f"xray-mouth-{stamp}"
+
+def patient_directory_slug(patient_name: str) -> str:
+    """Make a readable, Unicode-preserving directory component safe on Windows."""
+    normalized = unicodedata.normalize("NFC", patient_name).strip()
+    safe = WINDOWS_INVALID_FILENAME.sub("_", normalized)
+    safe = re.sub(r"\s+", "_", safe).strip(" ._")
+    return safe or "patient"
+
+
+def timestamped_result_directory(
+    output_root: Path, patient_name: str, timestamp: datetime | None = None
+) -> Path:
+    stamp = (timestamp or datetime.now()).strftime("%Y-%m-%d_%H-%M-%S")
+    candidate = output_root / f"{patient_directory_slug(patient_name)}_{stamp}"
     suffix = 1
     while candidate.exists():
-        candidate = output_root / f"xray-mouth-{stamp}-{suffix:02d}"
+        candidate = output_root / f"{patient_directory_slug(patient_name)}_{stamp}-{suffix:02d}"
         suffix += 1
     return candidate
 
@@ -29,12 +43,15 @@ def timestamped_result_directory(output_root: Path, timestamp: datetime | None =
 def create_demo_images(directory: Path, protocol: Protocol = DEFAULT_PROTOCOL) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     for slot in protocol.slots:
+        target = directory / f"{slot.prefix}_simulated.png"
+        if target.exists():
+            continue
         image = Image.new("L", (600, 900), color=20 + slot.number * 8)
         draw = ImageDraw.Draw(image)
         draw.ellipse((120, 80, 480, 820), outline=220, width=12)
         draw.line((300, 170, 300, 730), fill=150, width=7)
         draw.text((30, 30), f"SIMULATED {slot.prefix}", fill=255)
-        image.save(directory / f"{slot.prefix}_simulated.png")
+        image.save(target)
 
 
 def _write_pdf(image_path: Path, pdf_path: Path) -> None:
@@ -76,7 +93,7 @@ def run_workflow(config: WorkflowConfig, protocol: Protocol = DEFAULT_PROTOCOL) 
         raise InputValidationError(
             f"Strict mode requires a complete series; missing slots: {formatted}"
         )
-    output_directory = timestamped_result_directory(config.output_root)
+    output_directory = timestamped_result_directory(config.output_root, config.patient_name)
     output_directory.mkdir(parents=True, exist_ok=False)
     exam = Exam(patient_name=config.patient_name.strip(), demo=config.demo)
     render = RenderConfig(contrast=config.contrast)
@@ -91,7 +108,14 @@ def run_workflow(config: WorkflowConfig, protocol: Protocol = DEFAULT_PROTOCOL) 
         render_path
     )
     _write_pdf(render_path, pdf_path)
-    write_report(report_path, exam, protocol, set(radiographs))
+    write_report(
+        report_path,
+        exam,
+        protocol,
+        radiographs,
+        len(source_paths),
+        (preview_path.name, render_path.name, pdf_path.name),
+    )
     return ExportResult(
         output_directory,
         preview_path,
