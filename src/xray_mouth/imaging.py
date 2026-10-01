@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import re
 import warnings
-from hashlib import file_digest
 from pathlib import Path
 
 from PIL import Image, ImageEnhance, ImageOps, UnidentifiedImageError
@@ -11,6 +11,14 @@ from xray_mouth.domain import Protocol, Radiograph
 from xray_mouth.exceptions import DuplicateSlotError, ImageIntegrityError, InputValidationError
 
 PREFIX_PATTERN = re.compile(r"^([0-9]{2})(?:[_-]|$)")
+
+
+def _sha256(path: Path) -> bytes:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.digest()
 
 
 def parse_slot_prefix(path: Path) -> int | None:
@@ -37,8 +45,7 @@ def map_radiographs(paths: list[Path], protocol: Protocol) -> dict[int, Radiogra
                 f"Duplicate slot {prefix:02d}: {mapped[prefix].path.name!r} and {path.name!r}"
             )
         verify_image(path)
-        with path.open("rb") as stream:
-            fingerprint = file_digest(stream, "sha256").digest()
+        fingerprint = _sha256(path)
         if fingerprint in fingerprints:
             raise DuplicateSlotError(
                 f"Identical image files claim slots {fingerprints[fingerprint]:02d} "
@@ -46,7 +53,8 @@ def map_radiographs(paths: list[Path], protocol: Protocol) -> dict[int, Radiogra
             )
         fingerprints[fingerprint] = prefix
         slot = protocol.slot_for(prefix)
-        assert slot is not None
+        if slot is None:  # Defensive invariant; membership was checked above.
+            raise InputValidationError(f"Protocol has no definition for slot {prefix:02d}.")
         mapped[prefix] = Radiograph(slot=slot, path=path)
     return mapped
 
