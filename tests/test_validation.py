@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -18,7 +19,12 @@ from xray_mouth.workflow import create_demo_images, patient_directory_slug, run_
 def test_invalid_contrast_rejected_by_api_and_cli(tmp_path: Path, contrast: float) -> None:
     with pytest.raises(InputValidationError, match="Contrast"):
         WorkflowConfig(tmp_path, tmp_path / "out", "Synthetic", contrast=contrast)
-    assert main(["--patient", "Synthetic", "--input", str(tmp_path), f"--contrast={contrast}"]) == 2
+    assert (
+        main(
+            ["series", "--patient", "Synthetic", "--input", str(tmp_path), f"--contrast={contrast}"]
+        )
+        == 1
+    )
     assert not (tmp_path / "out").exists()
 
 
@@ -160,6 +166,8 @@ def test_transparent_pixels_render_against_black_without_modifying_source(tmp_pa
 
 
 def test_duplicate_slot_message_escapes_filename_controls(tmp_path: Path) -> None:
+    if os.name == "nt":
+        pytest.skip("Windows forbids control characters in filenames")
     first, second = tmp_path / "01_scan\nstatus.png", tmp_path / "01_copy.png"
     Image.new("L", (10, 10)).save(first)
     Image.new("L", (10, 10), 100).save(second)

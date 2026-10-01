@@ -34,10 +34,10 @@ def timestamped_result_directory(
     output_root: Path, patient_name: str, timestamp: datetime | None = None
 ) -> Path:
     stamp = (timestamp or datetime.now()).strftime("%Y-%m-%d_%H-%M-%S")
-    candidate = output_root / f"{patient_directory_slug(patient_name)}_{stamp}"
+    candidate = output_root / f"xray-mouth_{stamp}"
     suffix = 1
     while candidate.exists() or candidate.is_symlink():
-        candidate = output_root / f"{patient_directory_slug(patient_name)}_{stamp}-{suffix:02d}"
+        candidate = output_root / f"xray-mouth_{stamp}-{suffix:02d}"
         suffix += 1
     return candidate
 
@@ -61,7 +61,11 @@ def create_demo_images(directory: Path, protocol: Protocol = DEFAULT_PROTOCOL) -
 
 def _write_pdf(image_path: Path, pdf_path: Path) -> None:
     page_width, page_height = landscape(A4)
-    document = pdf_canvas.Canvas(str(pdf_path), pagesize=(page_width, page_height))
+    document = pdf_canvas.Canvas(str(pdf_path), pagesize=(page_width, page_height), invariant=1)
+    document.setAuthor("XRay Mouth")
+    document.setCreator("XRay Mouth")
+    document.setTitle("Non-diagnostic radiograph series")
+    document.setSubject("Locally generated export; contains sensitive health information")
     document.setFillColorRGB(0, 0, 0)
     document.rect(0, 0, page_width, page_height, fill=1, stroke=0)
     document.drawImage(
@@ -136,7 +140,11 @@ def _run_workflow(config: WorkflowConfig, protocol: Protocol = DEFAULT_PROTOCOL)
             (preview_path.name, render_path.name, pdf_path.name),
         )
     except Exception:
-        shutil.rmtree(output_directory)
+        if (
+            output_directory.parent.resolve() == config.output_root.resolve()
+            and not output_directory.is_symlink()
+        ):
+            shutil.rmtree(output_directory)
         raise
     return ExportResult(
         output_directory,

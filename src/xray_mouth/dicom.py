@@ -22,7 +22,18 @@ DIRECT_IDENTIFIERS = (
     "PerformingPhysicianName",
     "OperatorsName",
     "AccessionNumber",
+    "OtherPatientIDs",
+    "OtherPatientNames",
+    "MedicalRecordLocator",
+    "EthnicGroup",
+    "Occupation",
+    "AdditionalPatientHistory",
+    "StudyID",
+    "RequestingPhysician",
+    "PatientComments",
 )
+
+UID_KEYWORDS = ("SOPInstanceUID", "StudyInstanceUID", "SeriesInstanceUID")
 
 
 def anonymize_dataset(dataset: Dataset) -> Dataset:
@@ -33,9 +44,10 @@ def anonymize_dataset(dataset: Dataset) -> Dataset:
         if keyword in result:
             result.data_element(keyword).value = ""
     result.PatientIdentityRemoved = "YES"
-    result.DeidentificationMethod = "xray-mouth basic profile v0.1"
+    # Do not claim conformance with the much broader DICOM PS3.15 profile.
+    result.DeidentificationMethod = "xray-mouth limited direct-identifier removal v0.2"
     result.remove_private_tags()
-    for keyword in ("SOPInstanceUID", "StudyInstanceUID", "SeriesInstanceUID"):
+    for keyword in UID_KEYWORDS:
         if keyword in result:
             result.data_element(keyword).value = generate_uid()
     return result
@@ -46,8 +58,18 @@ def anonymize_file(source: Path, destination: Path) -> Path:
 
     if source.resolve() == destination.resolve():
         raise ValueError("destination must differ from source")
+    if destination.exists() or destination.is_symlink():
+        raise FileExistsError("destination already exists")
     dataset = pydicom.dcmread(source)
     anonymized = anonymize_dataset(dataset)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    anonymized.save_as(destination)
+    temporary = destination.with_name(f".{destination.name}.tmp")
+    if temporary.exists() or temporary.is_symlink():
+        raise FileExistsError("temporary destination already exists")
+    try:
+        anonymized.save_as(temporary)
+        temporary.replace(destination)
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
     return destination

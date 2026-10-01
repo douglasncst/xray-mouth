@@ -1,4 +1,5 @@
 """Command-line interface for dataset and clinical-series workflows."""
+
 from __future__ import annotations
 
 import argparse
@@ -17,7 +18,9 @@ from .workflow import WorkflowConfig, run_workflow
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="xray-mouth", description="Privacy-first dental imaging tools.")
+    parser = argparse.ArgumentParser(
+        prog="xray-mouth", description="Privacy-first dental imaging tools."
+    )
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
     inspect_parser = commands.add_parser("inspect", help="Generate a JSON dataset report")
@@ -64,18 +67,27 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Report: {args.directory / 'report.json'}")
         return 0
     try:
-        result = run_workflow(WorkflowConfig(
-            input_directory=args.input, output_root=args.output_root,
-            patient_name=args.patient, strict=args.strict, demo=args.demo,
-            contrast=args.contrast, clinic_name=args.clinic_name,
-            clinic_subtitle=args.clinic_subtitle, exam_label=args.exam_label,
-        ))
+        result = run_workflow(
+            WorkflowConfig(
+                input_directory=args.input,
+                output_root=args.output_root,
+                patient_name=args.patient,
+                strict=args.strict,
+                demo=args.demo,
+                contrast=args.contrast,
+                clinic_name=args.clinic_name,
+                clinic_subtitle=args.clinic_subtitle,
+                exam_label=args.exam_label,
+            )
+        )
     except XRayMouthError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
     print(f"Created export with {len(result.mapped_slots)} mapped slots.")
     if result.missing_slots:
-        print(f"Warning: missing slots: {', '.join(f'{slot:02d}' for slot in result.missing_slots)}")
+        print(
+            f"Warning: missing slots: {', '.join(f'{slot:02d}' for slot in result.missing_slots)}"
+        )
     if args.open_result and os.name == "nt":
         try:
             os.startfile(result.pdf_path)  # type: ignore[attr-defined]

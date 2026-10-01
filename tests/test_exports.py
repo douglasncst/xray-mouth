@@ -52,6 +52,7 @@ def test_output_root_file_returns_cli_error_without_traceback(tmp_path: Path, ca
     assert (
         main(
             [
+                "series",
                 "--patient",
                 "Synthetic",
                 "--input",

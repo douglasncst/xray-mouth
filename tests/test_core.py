@@ -64,7 +64,7 @@ def test_patient_slug_and_collision_handling(tmp_path: Path) -> None:
     assert patient_directory_slug(' <>:"/\\|?* ') == "patient"
     timestamp = datetime(2026, 9, 30, 12, 30, 45)
     first = timestamped_result_directory(tmp_path, "João da Silva", timestamp)
-    assert first.name == "João_da_Silva_2026-09-30_12-30-45"
+    assert first.name == "xray-mouth_2026-09-30_12-30-45"
     first.mkdir()
     assert timestamped_result_directory(tmp_path, "João da Silva", timestamp).name.endswith("-01")
 
@@ -177,6 +177,7 @@ def test_cli_happy_error_and_strict_paths(tmp_path: Path) -> None:
     assert (
         main(
             [
+                "series",
                 "--patient",
                 "Demo",
                 "--input",
@@ -188,5 +189,10 @@ def test_cli_happy_error_and_strict_paths(tmp_path: Path) -> None:
         )
         == 0
     )
-    assert main(["--patient", "Demo", "--input", str(tmp_path / "missing")]) == 1
-    assert main(["--patient", "Demo", "--input", str(tmp_path / "missing"), "--contrast", "0"]) == 2
+    assert main(["series", "--patient", "Demo", "--input", str(tmp_path / "missing")]) == 1
+    assert (
+        main(
+            ["series", "--patient", "Demo", "--input", str(tmp_path / "missing"), "--contrast", "0"]
+        )
+        == 1
+    )

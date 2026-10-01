@@ -49,3 +49,14 @@ def test_anonymize_file_never_overwrites_source(tmp_path: Path) -> None:
     destination = tmp_path / "clean.dcm"
     anonymize_file(path, destination)
     assert pydicom.dcmread(destination).PatientName == ""
+
+    before = destination.read_bytes()
+    with pytest.raises(FileExistsError):
+        anonymize_file(path, destination)
+    assert destination.read_bytes() == before
+
+
+def test_anonymizer_does_not_claim_full_dicom_profile() -> None:
+    result = anonymize_dataset(make_dataset())
+    assert "limited" in result.DeidentificationMethod
+    assert "basic profile" not in result.DeidentificationMethod.lower()
