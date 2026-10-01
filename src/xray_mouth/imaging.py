@@ -56,6 +56,10 @@ def verify_image(path: Path) -> None:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
             with Image.open(path) as image:
+                if image.format not in {"PNG", "JPEG", "TIFF", "BMP"}:
+                    raise ImageIntegrityError(
+                        "Unsupported image content; use PNG, JPEG, TIFF or BMP."
+                    )
                 if getattr(image, "n_frames", 1) != 1:
                     raise ImageIntegrityError("Multipage images are unsupported; export each page.")
                 if image.mode.startswith("I") or image.mode == "F":
@@ -83,7 +87,11 @@ def load_render_image(path: Path, contrast: float = 1.0) -> Image.Image:
     try:
         verify_image(path)
         with Image.open(path) as source:
-            image = ImageOps.exif_transpose(source).convert("L")
+            oriented = ImageOps.exif_transpose(source)
+            if oriented.mode in {"RGBA", "LA"} or "transparency" in oriented.info:
+                rgba = oriented.convert("RGBA")
+                oriented = Image.alpha_composite(Image.new("RGBA", rgba.size, "black"), rgba)
+            image = oriented.convert("L")
             if contrast != 1.0:
                 image = ImageEnhance.Contrast(image).enhance(contrast)
             return image.convert("RGB")

@@ -45,11 +45,33 @@ def default_geometry() -> LayoutGeometry:
     return LayoutGeometry(slots=top | lower | sides, center=Rect(0.20, 0.41, 0.60, 0.22))
 
 
-def _font(size: int) -> ImageFont.ImageFont:
+def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     try:
         return ImageFont.truetype("DejaVuSans.ttf", size=size)
     except OSError:
-        return ImageFont.load_default(size=size)
+        # Pillow 10.0's fallback has no size argument or size attribute.
+        return ImageFont.load_default()
+
+
+def _fit_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
+    width: int,
+) -> str:
+    """Keep display text inside its region; full information remains in the report."""
+    try:
+        draw.textbbox((0, 0), text, font=font)
+    except UnicodeEncodeError:
+        text = text.encode("latin-1", errors="replace").decode("latin-1")
+    original = text
+    while text:
+        displayed = text if text == original else text + "..."
+        box = draw.textbbox((0, 0), displayed, font=font)
+        if box[2] - box[0] <= width:
+            return displayed
+        text = text[:-1]
+    return ""
 
 
 def build_series_image(
@@ -64,8 +86,10 @@ def build_series_image(
         raise ValueError("Default layout geometry does not cover the selected protocol.")
     canvas = Image.new("RGB", size, "black")
     draw = ImageDraw.Draw(canvas)
-    label_font = _font(max(13, size[0] // 110))
-    detail_font = _font(max(14, size[0] // 85))
+    label_size = max(13, size[0] // 110)
+    detail_size = max(14, size[0] // 85)
+    label_font = _font(label_size)
+    detail_font = _font(detail_size)
     for slot in protocol.slots:
         x, y, width, height = geometry.slots[slot.number].pixels(size)
         if radiograph := radiographs.get(slot.number):
@@ -75,7 +99,7 @@ def build_series_image(
             draw.rectangle(
                 (x, y, x + width, y + height), outline=(110, 110, 110), width=max(1, size[0] // 900)
             )
-            message = f"{slot.prefix}  MISSING"
+            message = _fit_text(draw, f"{slot.prefix}  MISSING", label_font, width)
             box = draw.textbbox((0, 0), message, font=label_font)
             draw.text(
                 (x + (width - (box[2] - box[0])) / 2, y + height / 2),
@@ -84,8 +108,8 @@ def build_series_image(
                 font=label_font,
             )
         draw.text(
-            (x, max(0, y - label_font.size - 4)),
-            f"{slot.prefix} {slot.label}",
+            (x, max(0, y - label_size - 4)),
+            _fit_text(draw, f"{slot.prefix} {slot.label}", label_font, width),
             fill=(205, 205, 205),
             font=label_font,
         )
@@ -95,9 +119,14 @@ def build_series_image(
     lines = [title, exam.patient_name, f"Generated: {exam.created_at.strftime('%Y-%m-%d %H:%M')}"]
     if exam.metadata:
         lines.extend(f"{key}: {value}" for key, value in exam.metadata.items())
-    line_height = detail_font.size + 7
+    line_height = detail_size + 7
+    max_lines = max(1, ch // line_height)
+    if len(lines) > max_lines:
+        lines = lines[:max_lines]
+        lines[-1] = "Additional details in report"
     start_y = cy + (ch - line_height * len(lines)) // 2
     for index, line in enumerate(lines):
+        line = _fit_text(draw, line, detail_font, cw - 10)
         box = draw.textbbox((0, 0), line, font=detail_font)
         draw.text(
             (cx + (cw - (box[2] - box[0])) / 2, start_y + index * line_height),

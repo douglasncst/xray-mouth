@@ -120,3 +120,39 @@ def test_identical_files_cannot_claim_different_slots(tmp_path: Path) -> None:
     second.write_bytes(first.read_bytes())
     with pytest.raises(InputValidationError, match="Identical image files claim slots 01 and 02"):
         map_radiographs([first, second], DEFAULT_PROTOCOL)
+
+
+@pytest.mark.parametrize(
+    "extension,format_name",
+    [
+        ("png", "PNG"),
+        ("jpg", "JPEG"),
+        ("jpeg", "JPEG"),
+        ("tif", "TIFF"),
+        ("tiff", "TIFF"),
+        ("bmp", "BMP"),
+    ],
+)
+def test_all_documented_image_formats_decode(
+    tmp_path: Path, extension: str, format_name: str
+) -> None:
+    path = tmp_path / f"01_image.{extension}"
+    Image.new("RGB", (10, 20), "white").save(path, format=format_name)
+    assert map_radiographs([path], DEFAULT_PROTOCOL)[1].path == path
+
+
+def test_unsupported_content_cannot_hide_behind_png_extension(tmp_path: Path) -> None:
+    path = tmp_path / "01_disguised.png"
+    Image.new("RGB", (10, 20)).save(path, format="GIF")
+    with pytest.raises(ImageIntegrityError, match="Unsupported image content"):
+        verify_image(path)
+
+
+def test_transparent_pixels_render_against_black_without_modifying_source(tmp_path: Path) -> None:
+    from xray_mouth.imaging import load_render_image
+
+    path = tmp_path / "01_alpha.png"
+    Image.new("RGBA", (10, 20), (255, 255, 255, 0)).save(path)
+    before = path.read_bytes()
+    assert load_render_image(path).getpixel((0, 0)) == (0, 0, 0)
+    assert path.read_bytes() == before
