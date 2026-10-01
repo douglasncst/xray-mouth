@@ -23,7 +23,8 @@ def test_invalid_contrast_rejected_by_api_and_cli(tmp_path: Path, contrast: floa
 
 
 @pytest.mark.parametrize(
-    "patient", ["", "   ", "Alice\nSeries status: COMPLETE", "A\x00B", "A" * 201]
+    "patient",
+    ["", "   ", "Alice\nSeries status: COMPLETE", "A\x00B", "A" * 201, "A\u2028B", "A\x7fB"],
 )
 def test_patient_validation_before_side_effects(tmp_path: Path, patient: str) -> None:
     with pytest.raises(InputValidationError, match="Patient name"):
@@ -156,3 +157,13 @@ def test_transparent_pixels_render_against_black_without_modifying_source(tmp_pa
     before = path.read_bytes()
     assert load_render_image(path).getpixel((0, 0)) == (0, 0, 0)
     assert path.read_bytes() == before
+
+
+def test_duplicate_slot_message_escapes_filename_controls(tmp_path: Path) -> None:
+    first, second = tmp_path / "01_scan\nstatus.png", tmp_path / "01_copy.png"
+    Image.new("L", (10, 10)).save(first)
+    Image.new("L", (10, 10), 100).save(second)
+    with pytest.raises(InputValidationError) as error:
+        map_radiographs([first, second], DEFAULT_PROTOCOL)
+    assert "\\nstatus" in str(error.value)
+    assert "\n" not in str(error.value)

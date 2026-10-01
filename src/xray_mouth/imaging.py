@@ -29,12 +29,12 @@ def map_radiographs(paths: list[Path], protocol: Protocol) -> dict[int, Radiogra
             continue
         if prefix not in allowed:
             raise InputValidationError(
-                f"{path.name} uses slot {prefix:02d}, which is not part of the "
+                f"{path.name!r} uses slot {prefix:02d}, which is not part of the "
                 f"{protocol.name} protocol."
             )
         if prefix in mapped:
             raise DuplicateSlotError(
-                f"Duplicate slot {prefix:02d}: {mapped[prefix].path.name} and {path.name}"
+                f"Duplicate slot {prefix:02d}: {mapped[prefix].path.name!r} and {path.name!r}"
             )
         verify_image(path)
         with path.open("rb") as stream:

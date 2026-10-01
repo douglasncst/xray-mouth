@@ -30,9 +30,7 @@ class WorkflowConfig:
             raise InputValidationError("Contrast must be finite and greater than zero.")
         if not self.patient_name.strip():
             raise InputValidationError("Patient name must not be empty.")
-        if len(self.patient_name) > 200 or any(
-            ord(character) < 32 or ord(character) == 127 for character in self.patient_name
-        ):
+        if len(self.patient_name) > 200 or not self.patient_name.isprintable():
             raise InputValidationError(
                 "Patient name must be at most 200 characters without controls."
             )

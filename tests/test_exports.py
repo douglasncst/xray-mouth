@@ -118,3 +118,26 @@ def test_report_preserves_all_metadata_as_single_lines(tmp_path: Path) -> None:
     exam = Exam("Synthetic", metadata={"key\n": "value\r\n"})
     write_report(path, exam, DEFAULT_PROTOCOL, {}, 0, ("a.png", "b.png", "c.pdf"))
     assert "key\\u000a: value\\u000d\\u000a" in path.read_text()
+
+
+def test_creation_collision_retries_without_overwriting_other_export(
+    tmp_path: Path, monkeypatch
+) -> None:
+    settings = config(tmp_path)
+    mkdir = Path.mkdir
+    competitor = None
+
+    def racing_mkdir(path, *args, **kwargs):
+        nonlocal competitor
+        if path.parent == settings.output_root and competitor is None:
+            competitor = path
+            mkdir(path)
+            (path / "keep.txt").write_text("competing export")
+        return mkdir(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "mkdir", racing_mkdir)
+    result = workflow.run_workflow(settings)
+    assert result.directory != competitor
+    assert competitor is not None
+    assert (competitor / "keep.txt").read_text() == "competing export"
+    assert result.pdf_path.exists()
