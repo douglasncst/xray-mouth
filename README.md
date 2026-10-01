@@ -1,6 +1,8 @@
 # xray-mouth
 
 [![CI](https://github.com/douglasncst/xray-mouth/actions/workflows/ci.yml/badge.svg)](https://github.com/douglasncst/xray-mouth/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/douglasncst/xray-mouth/actions/workflows/codeql.yml/badge.svg)](https://github.com/douglasncst/xray-mouth/actions/workflows/codeql.yml)
+[![GitHub release](https://img.shields.io/github/v/release/douglasncst/xray-mouth)](https://github.com/douglasncst/xray-mouth/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
@@ -90,6 +92,10 @@ pytest
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and the [security policy](SECURITY.md).
 
+If you test `xray-mouth` in a research or education workflow, please share a privacy-safe
+[adoption report](docs/ADOPTION.md). Reports help prioritize compatibility work and demonstrate
+real-world utility without collecting clinical data.
+
 ## Project status
 
 Version `0.1.0` is an alpha research-tooling release. The current scope is dataset preparation and privacy-aware inspection, not the full RXFlow acquisition application and not diagnostic AI. Feedback through GitHub issues is welcome.
@@ -105,3 +111,5 @@ Version `0.1.0` is an alpha research-tooling release. The current scope is datas
 ## License
 
 MIT © Douglas Casty. Third-party datasets and images retain their own licenses and are not included.
+
+For research references, use the metadata in [CITATION.cff](CITATION.cff).

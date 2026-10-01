@@ -12,7 +12,7 @@
 - [ ] Configurable preprocessing manifests
 - [ ] Dataset-level duplicate detection
 - [ ] Structured validation profiles
-- [ ] Synthetic example dataset and tutorial
+- [x] Synthetic example dataset and tutorial
 
 ## 0.3 — Evaluation
 

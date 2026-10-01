@@ -23,4 +23,8 @@ pytest
 
 Good first contributions include format support, documentation, test fixtures made from synthetic data, accessibility improvements, and reproducibility tooling. Diagnostic claims and patient-derived samples are out of scope.
 
+Issues labeled `good first issue` are intentionally small and include acceptance criteria. Maintainers
+aim to acknowledge contributions within seven days. Project decisions and maintainer responsibilities
+are described in [GOVERNANCE.md](GOVERNANCE.md).
+
 By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).

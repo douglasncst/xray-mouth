@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software in research, please cite it using this metadata."
+title: "xray-mouth: privacy-first dental X-ray dataset tooling"
+type: software
+authors:
+  - family-names: Casty
+    given-names: Douglas
+repository-code: "https://github.com/douglasncst/xray-mouth"
+url: "https://github.com/douglasncst/xray-mouth"
+license: MIT
+version: 0.1.0
+date-released: 2026-10-01
+keywords:
+  - dental imaging
+  - DICOM
+  - de-identification
+  - reproducible research

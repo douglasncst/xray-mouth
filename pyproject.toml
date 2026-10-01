@@ -35,6 +35,8 @@ xray-mouth = "xray_mouth.cli:main"
 [project.urls]
 Homepage = "https://github.com/douglasncst/xray-mouth"
 Issues = "https://github.com/douglasncst/xray-mouth/issues"
+Changelog = "https://github.com/douglasncst/xray-mouth/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/douglasncst/xray-mouth/tree/main/docs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/xray_mouth"]
