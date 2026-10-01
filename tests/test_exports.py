@@ -12,6 +12,7 @@ from xray_mouth.cli import main
 from xray_mouth.config import WorkflowConfig
 from xray_mouth.domain import DEFAULT_PROTOCOL, Exam, Protocol, Radiograph
 from xray_mouth.exceptions import ExportError, InputValidationError
+from xray_mouth.layout import default_geometry
 from xray_mouth.reporting import write_report
 
 
