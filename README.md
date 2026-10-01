@@ -2,33 +2,23 @@
 
 [![CI](https://github.com/douglasncst/xray-mouth/actions/workflows/ci.yml/badge.svg)](https://github.com/douglasncst/xray-mouth/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/douglasncst/xray-mouth/actions/workflows/codeql.yml/badge.svg)](https://github.com/douglasncst/xray-mouth/actions/workflows/codeql.yml)
-[![GitHub release](https://img.shields.io/github/v/release/douglasncst/xray-mouth)](https://github.com/douglasncst/xray-mouth/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
-Privacy-first, reproducible tooling for dental X-ray dataset preparation.
+Local, privacy-aware Python tools for dental imaging research: dataset inspection, limited DICOM identifier removal, and non-diagnostic organization of a 14-image periapical series.
 
-![xray-mouth synthetic demo](docs/assets/demo.svg)
+> [!CAUTION]
+> Alpha research software—not a medical device, diagnostic system, PACS, certified anonymizer, or substitute for institutional review. Outputs can contain protected health information. The DICOM command removes a limited set of metadata and private tags; it does **not** inspect or redact burned-in pixel annotations and does not claim conformance with the complete DICOM PS3.15 confidentiality profile.
 
-`xray-mouth` helps researchers and developers inspect raster image collections, detect basic quality and filename-privacy risks, create machine-readable dataset reports, and write de-identified DICOM copies before collaboration.
+## Capabilities
 
-> [!IMPORTANT]
-> This project is research software. It is **not a medical device**, does not provide diagnoses, and must not be used to make clinical decisions. De-identification is context-dependent; review outputs against your institution's policies before sharing data.
+- `inspect`: deterministic JSON inventory, SHA-256 hashes, basic raster statistics, and filename privacy warnings.
+- `anonymize`: writes a new DICOM file, clears common direct identifiers and private tags, and regenerates principal instance UIDs. It refuses to overwrite either the source or an existing destination.
+- `demo`: produces synthetic raster fixtures and an inspection report.
+- `series`: validates slot-prefixed raster files, preserves source files, and exports a 14-slot 3:4 layout as preview PNG, 600-DPI-sized PNG, PDF, and text report.
 
-## Why this project exists
+No command uploads data. Network isolation, access control, backups, retention, consent, and final disclosure review remain the operator's responsibility.
 
-Oral-imaging experiments often begin with one-off notebooks and undocumented preprocessing. That makes results difficult to reproduce and increases the risk of accidentally sharing identifiers. This project starts with the less glamorous but essential foundation: inspection, provenance, privacy checks, and documented workflows.
-
-## Features
-
-- Deterministic JSON inventory for PNG, JPEG, TIFF, BMP, and DICOM datasets
-- SHA-256 provenance hashes for every discovered file
-- Basic contrast, saturation, and edge-energy metrics for raster images
-- Warnings for filenames that may contain patient identifiers
-- Conservative DICOM de-identification that writes a new file and removes private tags
-- No image or patient data is uploaded anywhere
-
-## Installation
+## Install
 
 ```bash
 git clone https://github.com/douglasncst/xray-mouth.git
@@ -37,79 +27,42 @@ python -m venv .venv
 python -m pip install -e .
 ```
 
-## Quick start
+Python 3.10+ is supported. Runtime dependencies are Pillow, pydicom, and ReportLab.
 
-Inspect one image or a directory:
+## Examples
 
 ```bash
-xray-mouth inspect samples/example.png
 xray-mouth inspect data/ --recursive --output report.json
-```
-
-Write a de-identified DICOM copy:
-
-```bash
 xray-mouth anonymize input.dcm output/anonymous.dcm
-```
-
-The source file is never overwritten.
-
-Create a complete demonstration using generated data only:
-
-```bash
 xray-mouth demo demo-output
+xray-mouth series --patient "Synthetic Demo" --input demo-series --output-root reports --demo --strict
 ```
 
-This creates three synthetic images plus a `report.json`. No download, patient data, or network connection is required. See the [demo walkthrough](docs/DEMO.md).
+The clinical export places the patient name inside the sensitive artifacts but not in the export directory name. Filenames must begin with slots `01` through `14`. The renderer normalizes EXIF orientation, preserves image aspect ratio with black padding, rejects corrupt, disguised, multi-frame, oversized, symlinked, and high-bit-depth raster inputs, and never edits source images.
 
-## Example report
+## What this project does not do
 
-```json
-{
-  "schema_version": "1.0",
-  "file_count": 1,
-  "privacy_warning_count": 0,
-  "items": [
-    {
-      "path": "example.png",
-      "format": "PNG",
-      "width": 1024,
-      "height": 512,
-      "mean_intensity": 91.7,
-      "warnings": []
-    }
-  ]
-}
-```
+- diagnose, segment, classify, or recommend treatment;
+- acquire images from hardware or provide a tested TWAIN/vendor SDK adapter;
+- infer anatomy from pixels or validate that a file is assigned to the correct slot;
+- guarantee DICOM anonymization or remove burned-in annotations;
+- increase clinical detail by producing a 600-DPI-sized canvas.
 
 ## Development
 
 ```bash
 python -m pip install -e ".[dev]"
 ruff check .
+ruff format --check .
 pytest
+python -m build
+python -m twine check dist/*
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and the [security policy](SECURITY.md).
+Use synthetic fixtures only in issues and pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [docs/architecture.md](docs/architecture.md), and the [deep audit](docs/deep-audit-2026-10-01.md).
 
-If you test `xray-mouth` in a research or education workflow, please share a privacy-safe
-[adoption report](docs/ADOPTION.md). Reports help prioritize compatibility work and demonstrate
-real-world utility without collecting clinical data.
+## Release status
 
-## Project status
+The published `v0.1.0` release contains the original dataset-inspection/DICOM tool. The combined command structure on this audit branch is unreleased development work (`0.2.0.dev0`). Do not describe it as a published or clinically validated release.
 
-Version `0.1.0` is an alpha research-tooling release. The current scope is dataset preparation and privacy-aware inspection, not the full RXFlow acquisition application and not diagnostic AI. Feedback through GitHub issues is welcome.
-
-## Privacy and responsible use
-
-- Work only with data you are authorized to use.
-- Keep raw clinical data outside the repository.
-- Treat automated de-identification as one control in a broader review process.
-- Do not use repository outputs for diagnosis, treatment, or emergency decisions.
-- Report security or privacy concerns through the process in [SECURITY.md](SECURITY.md).
-
-## License
-
-MIT © Douglas Casty. Third-party datasets and images retain their own licenses and are not included.
-
-For research references, use the metadata in [CITATION.cff](CITATION.cff).
+MIT © Douglas Casty. No patient datasets or clinical images are included.

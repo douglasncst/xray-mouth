@@ -1,4 +1,6 @@
 .venv/
+.wheel-smoke/
+work-build/
 __pycache__/
 *.py[cod]
 .pytest_cache/

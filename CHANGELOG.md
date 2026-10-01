@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — 0.2.0.dev0
+
+- Combine dataset/DICOM and clinical-series capabilities behind explicit subcommands.
+- Remove patient identity from export directory names and PDF metadata.
+- Refuse DICOM destination overwrite and use atomic destination publication.
+- Enforce 3:4 slot geometry across supported canvas aspect ratios.
+- Add cross-platform CI/format coverage and document the true DICOM privacy boundary.
+
 All notable changes will be documented here.
 
 ## [Unreleased]
