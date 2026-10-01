@@ -108,8 +108,9 @@ def test_export_private_permissions_dpi_and_no_source_metadata(tmp_path: Path) -
     with Image.open(result.render_path) as rendered:
         assert rendered.info["dpi"] == pytest.approx((600, 600), abs=0.01)
         assert not rendered.getexif()
-        # Small sources now fill their slot in the 600 DPI canvas.
-        assert rendered.getpixel((int(0.135 * 7016), int(0.195 * 4960))) == (150, 150, 150)
+        # Small sources remain visible at the center of the new uniform 3:4 frame.
+        x, y, width, height = default_geometry().slots[1].pixels(rendered.size)
+        assert rendered.getpixel((x + width // 2, y + height // 2)) == (150, 150, 150)
     assert source.read_bytes() == original
 
 
