@@ -126,6 +126,38 @@ def iter_images(root: Path, recursive: bool = False) -> list[Path]:
     )
 
 
+def find_duplicate_groups(items: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Group inspected items sharing identical SHA-256 digests into duplicate groups.
+
+    Only groups with two or more paths are returned. Paths within each group and the
+    groups themselves are sorted to ensure deterministic and stable output across runs.
+
+    Limitations:
+        Detects exact byte-for-byte duplicates via SHA-256 hash matching. Does not
+        detect perceptual duplicates (e.g. re-encoded, resized, or metadata-altered images).
+    """
+    by_hash: dict[str, list[str]] = {}
+    for item in items:
+        digest = item.get("sha256")
+        path = item.get("path")
+        if isinstance(digest, str) and isinstance(path, str):
+            by_hash.setdefault(digest, []).append(path)
+
+    groups: list[dict[str, object]] = []
+    for digest in sorted(by_hash):
+        paths = sorted(by_hash[digest])
+        if len(paths) >= 2:
+            groups.append(
+                {
+                    "sha256": digest,
+                    "paths": paths,
+                }
+            )
+
+    groups.sort(key=lambda group: (group["paths"][0], group["sha256"]))
+    return groups
+
+
 def dataset_report(root: Path, recursive: bool = False) -> dict[str, object]:
     """Build a JSON-ready report. DICOM files are inventoried for anonymization."""
 
@@ -162,6 +194,8 @@ def dataset_report(root: Path, recursive: bool = False) -> dict[str, object]:
         "mean_intensity_stddev": round(math.fsum(numeric_stddevs) / len(numeric_stddevs), 3)
         if numeric_stddevs
         else None,
+        "duplicate_groups": find_duplicate_groups(items),
         "items": items,
         "errors": errors,
     }
+

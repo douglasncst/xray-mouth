@@ -10,7 +10,7 @@
 ## 0.2 — Reproducible pipelines
 
 - [ ] Configurable preprocessing manifests
-- [ ] Dataset-level duplicate detection
+- [x] Dataset-level duplicate detection
 - [ ] Structured validation profiles
 - [x] Synthetic example dataset and tutorial
 
