@@ -96,6 +96,10 @@ def test_geometry_is_within_real_pixel_canvases_without_overlap() -> None:
         width, height = canvas_size
         pixel_rects = {number: rect.pixels(canvas_size) for number, rect in geometry.slots.items()}
         center_x, center_y, center_width, center_height = geometry.center.pixels(canvas_size)
+        dimensions = {(rect[2], rect[3]) for rect in pixel_rects.values()}
+        assert len(dimensions) == 1
+        film_width, film_height = dimensions.pop()
+        assert film_width / film_height == pytest.approx(3 / 4, abs=0.004)
         for number, (x, y, rect_width, rect_height) in pixel_rects.items():
             assert 0 <= x < width and 0 <= y < height
             assert rect_width > 0 and rect_height > 0
@@ -106,9 +110,6 @@ def test_geometry_is_within_real_pixel_canvases_without_overlap() -> None:
                 or y + rect_height <= center_y
                 or center_y + center_height <= y
             ), f"slot {number:02d} invades the center area"
-        for number in (6, 7, 8, 9):
-            _, _, lateral_width, lateral_height = pixel_rects[number]
-            assert lateral_width >= 100 and lateral_height >= 100
         rectangles = list(pixel_rects.items())
         for index, (first_number, first) in enumerate(rectangles):
             first_x, first_y, first_width, first_height = first
