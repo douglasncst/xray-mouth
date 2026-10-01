@@ -45,7 +45,7 @@ def test_header_long_text_is_clipped_inside_header(monkeypatch) -> None:
 
 def test_all_film_frames_are_uniform_portrait_three_by_four() -> None:
     geometry = default_geometry()
-    for canvas in ((1754, 1240), (7016, 4960)):
+    for canvas in ((800, 600), (1600, 900), (1754, 1240), (7016, 4960)):
         rectangles = [geometry.slots[number].pixels(canvas) for number in range(1, 15)]
         widths = {rectangle[2] for rectangle in rectangles}
         heights = {rectangle[3] for rectangle in rectangles}

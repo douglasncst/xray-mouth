@@ -14,15 +14,17 @@ class Rect:
     y: float
     width: float
     height: float
+    aspect_ratio: float | None = None
 
     def pixels(self, canvas: tuple[int, int]) -> tuple[int, int, int, int]:
         width, height = canvas
-        return (
-            int(self.x * width),
-            int(self.y * height),
-            int(self.width * width),
-            int(self.height * height),
+        pixel_height = round(self.height * height)
+        pixel_width = (
+            round(pixel_height * self.aspect_ratio)
+            if self.aspect_ratio is not None
+            else round(self.width * width)
         )
+        return (round(self.x * width), round(self.y * height), pixel_width, pixel_height)
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,23 +53,23 @@ def default_geometry() -> LayoutGeometry:
 
     slots = {
         # Patient right: upper posterior through lower posterior.
-        1: Rect(left_x, side_y[0], film_width, film_height),
-        6: Rect(left_x, side_y[1], film_width, film_height),
-        7: Rect(left_x, side_y[2], film_width, film_height),
-        10: Rect(left_x, side_y[3], film_width, film_height),
+        1: Rect(left_x, side_y[0], film_width, film_height, 3 / 4),
+        6: Rect(left_x, side_y[1], film_width, film_height, 3 / 4),
+        7: Rect(left_x, side_y[2], film_width, film_height, 3 / 4),
+        10: Rect(left_x, side_y[3], film_width, film_height, 3 / 4),
         # Maxillary anterior row.
-        2: Rect(center_x[0], upper_center_y, film_width, film_height),
-        3: Rect(center_x[1], upper_center_y, film_width, film_height),
-        4: Rect(center_x[2], upper_center_y, film_width, film_height),
+        2: Rect(center_x[0], upper_center_y, film_width, film_height, 3 / 4),
+        3: Rect(center_x[1], upper_center_y, film_width, film_height, 3 / 4),
+        4: Rect(center_x[2], upper_center_y, film_width, film_height, 3 / 4),
         # Mandibular anterior row.
-        11: Rect(center_x[0], lower_center_y, film_width, film_height),
-        12: Rect(center_x[1], lower_center_y, film_width, film_height),
-        13: Rect(center_x[2], lower_center_y, film_width, film_height),
+        11: Rect(center_x[0], lower_center_y, film_width, film_height, 3 / 4),
+        12: Rect(center_x[1], lower_center_y, film_width, film_height, 3 / 4),
+        13: Rect(center_x[2], lower_center_y, film_width, film_height, 3 / 4),
         # Patient left: upper posterior through lower posterior.
-        5: Rect(right_x, side_y[0], film_width, film_height),
-        8: Rect(right_x, side_y[1], film_width, film_height),
-        9: Rect(right_x, side_y[2], film_width, film_height),
-        14: Rect(right_x, side_y[3], film_width, film_height),
+        5: Rect(right_x, side_y[0], film_width, film_height, 3 / 4),
+        8: Rect(right_x, side_y[1], film_width, film_height, 3 / 4),
+        9: Rect(right_x, side_y[2], film_width, film_height, 3 / 4),
+        14: Rect(right_x, side_y[3], film_width, film_height, 3 / 4),
     }
     # Reserved visual breathing room between the central upper/lower rows.
     return LayoutGeometry(slots=slots, center=Rect(0.20, 0.455, 0.60, 0.10))
