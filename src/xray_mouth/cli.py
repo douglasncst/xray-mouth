@@ -15,7 +15,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="Build a non-diagnostic periapical radiograph PDF series."
     )
     parser.add_argument(
-        "--patient", required=True, help="Patient name shown in the central exam area."
+        "--patient", required=True, help="Patient name shown in the document header."
     )
     parser.add_argument(
         "--input", type=Path, required=True, help="Directory containing slot-prefixed radiographs."
