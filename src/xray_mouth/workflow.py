@@ -105,8 +105,7 @@ def _run_workflow(config: WorkflowConfig, protocol: Protocol = DEFAULT_PROTOCOL)
             break
         except FileExistsError:
             continue
-    exam = Exam(patient_name=config.patient_name.strip(), demo=config.demo)
-    render = RenderConfig(contrast=config.contrast)
+    exam = Exam(\n        patient_name=config.patient_name.strip(),\n        metadata={\n            "clinic_name": config.clinic_name.strip(),\n            "clinic_subtitle": config.clinic_subtitle.strip(),\n            "exam_label": config.exam_label.strip(),\n        },\n        demo=config.demo,\n    )\n    render = RenderConfig(contrast=config.contrast)
     preview_path = output_directory / "periapical_series_preview.png"
     render_path = output_directory / "periapical_series_600dpi.png"
     pdf_path = output_directory / "periapical_series.pdf"
