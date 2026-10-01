@@ -4,6 +4,10 @@ All notable changes will be documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Deterministic duplicate file detection grouped by SHA-256 in dataset reports (#4)
+
 ## [0.1.0] - 2026-10-01
 
 ### Added

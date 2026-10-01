@@ -22,7 +22,7 @@ Oral-imaging experiments often begin with one-off notebooks and undocumented pre
 ## Features
 
 - Deterministic JSON inventory for PNG, JPEG, TIFF, BMP, and DICOM datasets
-- SHA-256 provenance hashes for every discovered file
+- SHA-256 provenance hashes and deterministic duplicate detection across files
 - Basic contrast, saturation, and edge-energy metrics for raster images
 - Warnings for filenames that may contain patient identifiers
 - Conservative DICOM de-identification that writes a new file and removes private tags
@@ -69,6 +69,7 @@ This creates three synthetic images plus a `report.json`. No download, patient d
   "schema_version": "1.0",
   "file_count": 1,
   "privacy_warning_count": 0,
+  "duplicate_groups": [],
   "items": [
     {
       "path": "example.png",
@@ -81,6 +82,14 @@ This creates three synthetic images plus a `report.json`. No download, patient d
   ]
 }
 ```
+
+### Duplicate detection
+
+Directory inspection reports include a `duplicate_groups` list grouping paths that share identical SHA-256 hashes. Only groups containing at least two paths are included. Groups and file paths are sorted deterministically so reports remain stable across runs.
+
+> [!NOTE]
+> **Limitations:** Duplicate detection is exact and byte-level based on SHA-256. It does not detect perceptual duplicates (e.g. re-compressed images, crops, resized copies, or images with identical pixel values but altered metadata headers).
+
 
 ## Development
 
