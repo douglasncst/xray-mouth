@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">xray-mouth synthetic demo</title>
+  <desc id="desc">A terminal showing creation and inspection of three synthetic dental X-ray images.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#16213a"/>
+    </linearGradient>
+    <linearGradient id="tooth" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc" stop-opacity=".94"/>
+      <stop offset="1" stop-color="#94a3b8" stop-opacity=".52"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="620" rx="28" fill="#f7f4ed"/>
+  <text x="70" y="92" fill="#111827" font-family="system-ui, sans-serif" font-size="48" font-weight="700">xray-mouth</text>
+  <text x="70" y="136" fill="#475569" font-family="system-ui, sans-serif" font-size="23">privacy-first dental X-ray dataset tooling</text>
+  <rect x="70" y="185" width="675" height="365" rx="18" fill="url(#bg)"/>
+  <circle cx="105" cy="218" r="8" fill="#fb7185"/>
+  <circle cx="132" cy="218" r="8" fill="#fbbf24"/>
+  <circle cx="159" cy="218" r="8" fill="#4ade80"/>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="19">
+    <text x="104" y="275" fill="#60a5fa">$</text>
+    <text x="130" y="275" fill="#e2e8f0">xray-mouth demo demo-output</text>
+    <text x="104" y="315" fill="#86efac">Created 3 synthetic images in demo-output</text>
+    <text x="104" y="350" fill="#cbd5e1">Report: demo-output/report.json</text>
+    <text x="104" y="410" fill="#60a5fa">$</text>
+    <text x="130" y="410" fill="#e2e8f0">xray-mouth inspect demo-output</text>
+    <text x="104" y="452" fill="#cbd5e1">file_count:</text>
+    <text x="250" y="452" fill="#fbbf24">3</text>
+    <text x="104" y="487" fill="#cbd5e1">privacy warnings:</text>
+    <text x="310" y="487" fill="#86efac">0</text>
+    <text x="104" y="522" fill="#cbd5e1">network uploads:</text>
+    <text x="290" y="522" fill="#86efac">none</text>
+  </g>
+  <rect x="790" y="185" width="340" height="365" rx="18" fill="#111827"/>
+  <text x="825" y="230" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="17">SYNTHETIC PREVIEW</text>
+  <g transform="translate(815 260)">
+    <rect width="290" height="220" rx="14" fill="#1f2937"/>
+    <g fill="url(#tooth)" stroke="#e2e8f0" stroke-width="3">
+      <path d="M24 38 Q18 7 48 6 Q78 7 72 38 L65 120 L51 193 L43 120 Z"/>
+      <path d="M78 36 Q74 2 108 5 Q139 5 134 38 L126 118 L112 196 L100 118 Z"/>
+      <path d="M140 35 Q136 0 171 4 Q205 5 198 38 L190 118 L176 196 L162 118 Z"/>
+      <path d="M205 38 Q200 5 232 6 Q264 7 258 39 L250 120 L237 193 L225 120 Z"/>
+    </g>
+  </g>
+  <text x="815" y="520" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="18">Generated in code. No patient data.</text>
+</svg>

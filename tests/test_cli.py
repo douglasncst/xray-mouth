@@ -24,3 +24,14 @@ def test_inspect_command_prints_report(tmp_path: Path, capsys: object) -> None:
     assert status == 0
     captured = capsys.readouterr()  # type: ignore[attr-defined]
     assert '"schema_version": "1.0"' in captured.out
+
+
+def test_demo_command_creates_only_synthetic_examples(tmp_path: Path, capsys: object) -> None:
+    output = tmp_path / "demo"
+
+    status = main(["demo", str(output)])
+
+    assert status == 0
+    assert (output / "synthetic_dental_xray.png").exists()
+    assert json.loads((output / "report.json").read_text(encoding="utf-8"))["file_count"] == 3
+    assert "synthetic images" in capsys.readouterr().out  # type: ignore[attr-defined]

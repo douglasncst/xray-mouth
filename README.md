@@ -6,6 +6,8 @@
 
 Privacy-first, reproducible tooling for dental X-ray dataset preparation.
 
+![xray-mouth synthetic demo](docs/assets/demo.svg)
+
 `xray-mouth` helps researchers and developers inspect raster image collections, detect basic quality and filename-privacy risks, create machine-readable dataset reports, and write de-identified DICOM copies before collaboration.
 
 > [!IMPORTANT]
@@ -50,6 +52,14 @@ xray-mouth anonymize input.dcm output/anonymous.dcm
 
 The source file is never overwritten.
 
+Create a complete demonstration using generated data only:
+
+```bash
+xray-mouth demo demo-output
+```
+
+This creates three synthetic images plus a `report.json`. No download, patient data, or network connection is required. See the [demo walkthrough](docs/DEMO.md).
+
 ## Example report
 
 ```json
@@ -79,6 +89,10 @@ pytest
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and the [security policy](SECURITY.md).
+
+## Project status
+
+Version `0.1.0` is an alpha research-tooling release. The current scope is dataset preparation and privacy-aware inspection, not the full RXFlow acquisition application and not diagnostic AI. Feedback through GitHub issues is welcome.
 
 ## Privacy and responsible use
 

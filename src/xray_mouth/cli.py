@@ -9,6 +9,7 @@ from pathlib import Path
 
 from . import __version__
 from .analysis import dataset_report
+from .demo import create_demo
 from .dicom import anonymize_file
 
 
@@ -28,6 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
     anonymize_parser = subparsers.add_parser("anonymize", help="Write a de-identified DICOM copy")
     anonymize_parser.add_argument("source", type=Path)
     anonymize_parser.add_argument("destination", type=Path)
+
+    demo_parser = subparsers.add_parser(
+        "demo", help="Create synthetic images and a reproducible example report"
+    )
+    demo_parser.add_argument("directory", type=Path)
     return parser
 
 
@@ -45,6 +51,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "anonymize":
         destination = anonymize_file(args.source, args.destination)
         print(f"Wrote de-identified copy to {destination}")
+        return 0
+    if args.command == "demo":
+        report = create_demo(args.directory)
+        print(f"Created {report['file_count']} synthetic images in {args.directory}")
+        print(f"Report: {args.directory / 'report.json'}")
         return 0
     return 2
 
