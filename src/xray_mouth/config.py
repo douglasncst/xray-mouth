@@ -24,6 +24,9 @@ class WorkflowConfig:
     strict: bool = False
     demo: bool = False
     contrast: float = 1.0
+    clinic_name: str = "XRay Mouth"
+    clinic_subtitle: str = "Clinical Radiograph Series"
+    exam_label: str = "Série periapical"
 
     def __post_init__(self) -> None:
         if not isfinite(self.contrast) or self.contrast <= 0:
@@ -34,3 +37,14 @@ class WorkflowConfig:
             raise InputValidationError(
                 "Patient name must be at most 200 characters without controls."
             )
+        for label, value, maximum in (
+            ("Clinic name", self.clinic_name, 120),
+            ("Clinic subtitle", self.clinic_subtitle, 160),
+            ("Exam label", self.exam_label, 120),
+        ):
+            if not value.strip():
+                raise InputValidationError(f"{label} must not be empty.")
+            if len(value) > maximum or not value.isprintable():
+                raise InputValidationError(
+                    f"{label} must be at most {maximum} characters without controls."
+                )

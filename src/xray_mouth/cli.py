@@ -15,7 +15,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="Build a non-diagnostic periapical radiograph PDF series."
     )
     parser.add_argument(
-        "--patient", required=True, help="Patient name shown in the central exam area."
+        "--patient", required=True, help="Patient name shown in the document header."
     )
     parser.add_argument(
         "--input", type=Path, required=True, help="Directory containing slot-prefixed radiographs."
@@ -46,6 +46,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--strict", action="store_true", help="Fail when any expected protocol slot is missing."
     )
+    parser.add_argument(
+        "--clinic-name",
+        default="XRay Mouth",
+        help="Clinic or brand name shown in the document header.",
+    )
+    parser.add_argument(
+        "--clinic-subtitle",
+        default="Clinical Radiograph Series",
+        help="Small subtitle shown below the clinic name.",
+    )
+    parser.add_argument(
+        "--exam-label",
+        default="Série periapical",
+        help="Exam description shown in the document header.",
+    )
     return parser
 
 
@@ -57,7 +72,15 @@ def main(argv: list[str] | None = None) -> int:
     try:
         result = run_workflow(
             WorkflowConfig(
-                args.input, args.output_root, args.patient, args.strict, args.demo, args.contrast
+                input_directory=args.input,
+                output_root=args.output_root,
+                patient_name=args.patient,
+                strict=args.strict,
+                demo=args.demo,
+                contrast=args.contrast,
+                clinic_name=args.clinic_name,
+                clinic_subtitle=args.clinic_subtitle,
+                exam_label=args.exam_label,
             )
         )
     except XRayMouthError as error:
