@@ -10,7 +10,7 @@ def write_report(
     exam: Exam,
     protocol: Protocol,
     radiographs: dict[int, Radiograph],
-    received_image_count: int,
+    candidate_image_count: int,
     output_names: tuple[str, str, str],
 ) -> None:
     missing = [slot for slot in protocol.slots if slot.number not in radiographs]
@@ -20,8 +20,11 @@ def write_report(
         f"Patient: {exam.patient_name}",
         f"Generated: {exam.created_at.isoformat(timespec='seconds')}",
         f"Protocol: {protocol.name}",
-        f"Images received: {received_image_count}",
+        f"Candidate image files found: {candidate_image_count}",
+        f"Radiographs mapped: {len(radiographs)}",
         f"Expected positions: {len(protocol.slots)}",
+        f"Missing positions: {len(missing)}",
+        "Missing slots: " + (", ".join(slot.prefix for slot in missing) or "none"),
         f"Series status: {'COMPLETE' if not missing else 'INCOMPLETE'}",
         "",
         "Positions:",

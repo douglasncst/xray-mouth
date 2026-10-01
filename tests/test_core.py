@@ -89,24 +89,38 @@ def test_aspect_ratio_exif_and_contrast_are_render_only(tmp_path: Path) -> None:
     assert padded.getpixel((100, 100)) == (255, 255, 255)
 
 
-def test_geometry_is_within_canvas_without_slot_overlap() -> None:
+def test_geometry_is_within_real_pixel_canvases_without_overlap() -> None:
     geometry = default_geometry()
     assert set(geometry.slots) == {slot.number for slot in DEFAULT_PROTOCOL.slots}
-    rects = list(geometry.slots.values())
-    for rect in rects:
-        assert 0 <= rect.x < 1 and 0 <= rect.y < 1
-        assert 0 < rect.width and 0 < rect.height
-        assert rect.x + rect.width <= 1 and rect.y + rect.height <= 1
-        assert rect.height / rect.width >= 1.0
-    for index, first in enumerate(rects):
-        for second in rects[index + 1 :]:
-            overlap = not (
-                first.x + first.width <= second.x
-                or second.x + second.width <= first.x
-                or first.y + first.height <= second.y
-                or second.y + second.height <= first.y
-            )
-            assert not overlap
+    for canvas_size in ((1754, 1240), (7016, 4960)):
+        width, height = canvas_size
+        pixel_rects = {number: rect.pixels(canvas_size) for number, rect in geometry.slots.items()}
+        center_x, center_y, center_width, center_height = geometry.center.pixels(canvas_size)
+        for number, (x, y, rect_width, rect_height) in pixel_rects.items():
+            assert 0 <= x < width and 0 <= y < height
+            assert rect_width > 0 and rect_height > 0
+            assert x + rect_width <= width and y + rect_height <= height
+            assert (
+                x + rect_width <= center_x
+                or center_x + center_width <= x
+                or y + rect_height <= center_y
+                or center_y + center_height <= y
+            ), f"slot {number:02d} invades the center area"
+        for number in (6, 7, 8, 9):
+            _, _, lateral_width, lateral_height = pixel_rects[number]
+            assert lateral_width >= 100 and lateral_height >= 100
+        rectangles = list(pixel_rects.items())
+        for index, (first_number, first) in enumerate(rectangles):
+            first_x, first_y, first_width, first_height = first
+            for second_number, second in rectangles[index + 1 :]:
+                second_x, second_y, second_width, second_height = second
+                overlap = not (
+                    first_x + first_width <= second_x
+                    or second_x + second_width <= first_x
+                    or first_y + first_height <= second_y
+                    or second_y + second_height <= first_y
+                )
+                assert not overlap, f"slots {first_number:02d} and {second_number:02d} overlap"
     assert build_series_image({}, Exam("Patient"), DEFAULT_PROTOCOL, (800, 600)).size == (800, 600)
 
 
@@ -124,7 +138,11 @@ def test_incomplete_workflow_source_immutability_and_report(tmp_path: Path) -> N
     assert "Series status: INCOMPLETE" in report
     assert "01 Superior posterior right: 01_source.png" in report
     assert "02 Superior anterior right: MISSING" in report
-    assert "Images received: 2" in report
+    assert "Candidate image files found: 2" in report
+    assert "Radiographs mapped: 1" in report
+    assert "Expected positions: 14" in report
+    assert "Missing positions: 13" in report
+    assert "Missing slots: 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14" in report
     assert "Source files: NOT MODIFIED" in report
     assert "periapical_series_600dpi.png" in report
     assert result.preview_path.exists() and result.pdf_path.exists() and result.render_path.exists()
@@ -146,7 +164,9 @@ def test_demo_mode_full_series_pdf_and_detailed_report(tmp_path: Path) -> None:
     assert Image.open(result.preview_path).size == (1754, 1240)
     assert Image.open(result.render_path).size == (7016, 4960)
     assert "Series status: COMPLETE" in report
-    assert "Images received: 14" in report
+    assert "Candidate image files found: 14" in report
+    assert "Radiographs mapped: 14" in report
+    assert "Missing positions: 0" in report
     assert "14 Lower posterior left: 14_simulated.png" in report
     assert "Mode: DEMO / SYNTHETIC / NON-DIAGNOSTIC" in report
     assert "Patient: Demo" in report
