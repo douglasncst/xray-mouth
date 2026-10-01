@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from math import isfinite
 from pathlib import Path
 
 from xray_mouth.exceptions import XRayMouthError
@@ -50,8 +51,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.contrast <= 0:
-        print("error: --contrast must be greater than zero", file=sys.stderr)
+    if not isfinite(args.contrast) or args.contrast <= 0:
+        print("error: --contrast must be finite and greater than zero", file=sys.stderr)
         return 2
     try:
         result = run_workflow(
@@ -69,7 +70,10 @@ def main(argv: list[str] | None = None) -> int:
             f"Warning: missing slots: {', '.join(f'{slot:02d}' for slot in result.missing_slots)}"
         )
     if args.open_result and os.name == "nt":
-        os.startfile(result.pdf_path)  # type: ignore[attr-defined]
+        try:
+            os.startfile(result.pdf_path)  # type: ignore[attr-defined]
+        except OSError:
+            print("Warning: PDF was saved but could not be opened.", file=sys.stderr)
     return 0
 
 

@@ -12,3 +12,7 @@ class DuplicateSlotError(InputValidationError):
 
 class ImageIntegrityError(InputValidationError):
     """Raised when a discovered source image is unreadable."""
+
+
+class ExportError(XRayMouthError):
+    """Raised when local filesystem operations prevent export."""

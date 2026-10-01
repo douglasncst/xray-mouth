@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 from pathlib import Path
+
+from xray_mouth.exceptions import InputValidationError
 
 SUPPORTED_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"})
 
@@ -21,3 +24,15 @@ class WorkflowConfig:
     strict: bool = False
     demo: bool = False
     contrast: float = 1.0
+
+    def __post_init__(self) -> None:
+        if not isfinite(self.contrast) or self.contrast <= 0:
+            raise InputValidationError("Contrast must be finite and greater than zero.")
+        if not self.patient_name.strip():
+            raise InputValidationError("Patient name must not be empty.")
+        if len(self.patient_name) > 200 or any(
+            ord(character) < 32 or ord(character) == 127 for character in self.patient_name
+        ):
+            raise InputValidationError(
+                "Patient name must be at most 200 characters without controls."
+            )

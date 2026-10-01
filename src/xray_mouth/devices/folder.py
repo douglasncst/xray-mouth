@@ -13,7 +13,14 @@ class FolderImageSource(ImageSource):
 
     def image_paths(self) -> list[Path]:
         if not self.directory.exists() or not self.directory.is_dir():
-            raise InputValidationError(f"Input directory does not exist: {self.directory}")
+            raise InputValidationError("Input directory does not exist or is not a directory.")
+        if any(
+            path.is_symlink() and path.suffix.lower() in SUPPORTED_EXTENSIONS
+            for path in self.directory.iterdir()
+        ):
+            raise InputValidationError(
+                "Symlinked images are unsupported; provide local image files."
+            )
         return sorted(
             path
             for path in self.directory.iterdir()
