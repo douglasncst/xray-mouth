@@ -10,7 +10,9 @@ It exists for clinics that receive individual digital images and need a clean, c
 - Maps two-digit filename prefixes `01` through `14` to a configurable protocol.
 - Detects duplicate slots, byte-identical files in different slots, and unreadable images before rendering.
 - Applies EXIF orientation only to an in-memory render copy; original files are never modified.
-- Builds a black-background layout with clear missing-slot markers.
+- Builds a black-background clinical mount with 14 equal 3:4 portrait film frames, rounded corners, and clear missing-slot markers.
+- Uses the full-mouth arrangement requested for the clinical layout: four films on each side, three maxillary-anterior films above, and three mandibular-anterior films below.
+- Renders a clinic-branded header with patient, exam, and date information; clinic text is configurable from the CLI.
 - Generates a preview PNG, an A4-targeted `600dpi` raster render, an A4 landscape PDF, and a text report in a timestamped directory.
 - Includes a synthetic, explicitly non-diagnostic demo mode.
 
@@ -35,6 +37,21 @@ xray-mouth --patient "Patient Name" --input ./input_images --output-root ./repor
 
 Use `--strict` to require all protocol positions. `--contrast 1.0` leaves contrast unchanged; a different positive value affects rendered copies only. On Windows, `--open` opens the resulting PDF.
 
+The clinical header can be branded without changing source images:
+
+```bash
+xray-mouth \
+  --patient "Patient Name" \
+  --input ./input_images \
+  --output-root ./reports \
+  --clinic-name "Green Smile" \
+  --clinic-subtitle "CLÍNICA ODONTOLÓGICA" \
+  --exam-label "Série periapical"
+```
+
+The default renderer keeps every radiograph frame at the same 3:4 portrait size. Source
+radiographs are scaled proportionally inside those frames and are never stretched or modified.
+
 Contrast must be finite and greater than zero. Patient names must contain 1–200 characters (with non-whitespace content) and no control characters. Long display text is shortened to fit the layout; the text report retains the full name. Exit codes are `0` for a completed export, `1` for an input/export error, and `2` for argument errors. Failure to open an already-saved PDF produces a warning.
 
 Run a synthetic demo without patient data:
@@ -57,7 +74,7 @@ Prefix each image with its two-digit slot number, for example:
 14_lower_left.tiff
 ```
 
-The default 14-position protocol is: superior posterior right, superior anterior right, superior incisors, superior anterior left, superior posterior left, lateral upper/lower right, lateral upper/lower left, lower posterior right, lower anterior right, lower incisors, lower anterior left, and lower posterior left. Missing positions are allowed unless `--strict` is used. Duplicate prefixes are errors.
+The default 14-position protocol is: superior posterior right, superior anterior right, superior incisors, superior anterior left, superior posterior left, lateral upper/lower right, lateral upper/lower left, lower posterior right, lower anterior right, lower incisors, lower anterior left, and lower posterior left. The clinical mount places slots 01/06/07/10 down the patient-right side, 02/03/04 across the upper center, 11/12/13 across the lower center, and 05/08/09/14 down the patient-left side. Missing positions are allowed unless `--strict` is used. Duplicate prefixes are errors.
 
 Slots are assigned **only by filename**, not by image content. There is no automatic exam-type classification, tooth recognition, or check that a radiograph actually belongs in its labeled position. The shipped renderer supports exactly the 14-position protocol. Files without an ASCII two-digit prefix and unsupported extensions are ignored; subfolders are not scanned. Byte-identical files assigned to different slots are rejected, but re-encoded or visually similar duplicates are not detected.
 
