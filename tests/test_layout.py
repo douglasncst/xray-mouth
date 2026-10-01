@@ -6,7 +6,7 @@ from xray_mouth.domain import DEFAULT_PROTOCOL, Exam
 from xray_mouth.layout import build_series_image, default_geometry
 
 
-def test_slot_labels_and_long_patient_text_stay_inside_regions(monkeypatch) -> None:
+def test_header_long_text_is_clipped_inside_header(monkeypatch) -> None:
     original = ImageDraw.ImageDraw.text
     calls = []
 
@@ -18,29 +18,41 @@ def test_slot_labels_and_long_patient_text_stay_inside_regions(monkeypatch) -> N
     size = (1754, 1240)
     build_series_image(
         {},
-        Exam("Synthetic " * 20, metadata={str(i): "value" for i in range(20)}),
+        Exam(
+            "Synthetic " * 30,
+            metadata={
+                "clinic_name": "Green Smile Dental Radiographic Center " * 5,
+                "clinic_subtitle": "Clinical radiograph series " * 10,
+                "exam_label": "Periapical full-mouth series " * 10,
+            },
+        ),
         DEFAULT_PROTOCOL,
         size,
     )
+
+    patient = next(call for call in calls if call[2].startswith("Paciente:"))
+    exam = next(call for call in calls if call[2].startswith("Exame:"))
+    assert patient[2].endswith("...")
+    assert exam[2].endswith("...")
+
+    info_x = int(size[0] * 0.39)
+    info_right = info_x + int(size[0] * 0.47)
+    for _, box, text in calls:
+        if text.startswith(("Paciente:", "Exame:", "Data:")):
+            assert info_x <= box[0] <= box[2] <= info_right
+
+
+def test_all_film_frames_are_uniform_portrait_three_by_four() -> None:
     geometry = default_geometry()
-    for slot in DEFAULT_PROTOCOL.slots:
-        x, _, width, _ = geometry.slots[slot.number].pixels(size)
-        label = next(
-            call
-            for call in calls
-            if call[2].startswith(f"{slot.prefix} ") and "MISSING" not in call[2]
-        )
-        assert x <= label[1][0] <= label[1][2] <= x + width
-    cx, cy, cw, ch = geometry.center.pixels(size)
-    central = [
-        call
-        for call in calls
-        if call[2] and call[2][:2] not in {slot.prefix for slot in DEFAULT_PROTOCOL.slots}
-    ]
-    assert any("..." in call[2] for call in central)
-    for _, box, _ in central:
-        assert cx <= box[0] <= box[2] <= cx + cw
-        assert cy <= box[1] <= box[3] <= cy + ch
+    for canvas in ((1754, 1240), (7016, 4960)):
+        rectangles = [geometry.slots[number].pixels(canvas) for number in range(1, 15)]
+        widths = {rectangle[2] for rectangle in rectangles}
+        heights = {rectangle[3] for rectangle in rectangles}
+        assert len(widths) == 1
+        assert len(heights) == 1
+        width = widths.pop()
+        height = heights.pop()
+        assert width / height == pytest.approx(3 / 4, abs=0.004)
 
 
 def test_missing_truetype_font_uses_compatible_fallback(monkeypatch) -> None:
