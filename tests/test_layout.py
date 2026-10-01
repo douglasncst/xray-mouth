@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from PIL import ImageDraw, ImageFont
+import pytest
 
 from xray_mouth.domain import DEFAULT_PROTOCOL, Exam
 from xray_mouth.layout import build_series_image, default_geometry
