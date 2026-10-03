@@ -12,4 +12,7 @@ build/
 *.dicom
 data/
 reports/
+relatorio/
+xray/*
+!xray/README.md
 .env

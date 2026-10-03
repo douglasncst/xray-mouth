@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "xray-mouth"
 version = "0.1.0"
-description = "Privacy-first tooling for reproducible dental X-ray dataset inspection."
+description = "Local Green Smile periapical-series PDF report generator."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [{ name = "Douglas Casty" }]
 keywords = ["dental", "dicom", "medical-imaging", "x-ray", "privacy"]
@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
   "Pillow>=10.0",
+  "playwright>=1.49",
   "pydicom>=3.0",
 ]
 

@@ -1,115 +1,67 @@
-# xray-mouth
+# XRay Mouth
 
-[![CI](https://github.com/douglasncst/xray-mouth/actions/workflows/ci.yml/badge.svg)](https://github.com/douglasncst/xray-mouth/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/douglasncst/xray-mouth/actions/workflows/codeql.yml/badge.svg)](https://github.com/douglasncst/xray-mouth/actions/workflows/codeql.yml)
-[![GitHub release](https://img.shields.io/github/v/release/douglasncst/xray-mouth)](https://github.com/douglasncst/xray-mouth/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+Gerador local de montagem radiografica Green Smile para series periapicais.
 
-Privacy-first, reproducible tooling for dental X-ray dataset preparation.
+O projeto recebe 16 radiografias numeradas, monta o quadro clinico com medidas controladas
+pixel a pixel e gera PDF, previa PNG, HTML e relatorio textual. Todo o processamento acontece
+localmente; nenhuma imagem e enviada para servicos externos.
 
-![xray-mouth synthetic demo](docs/assets/demo.svg)
+> Ferramenta experimental e nao diagnostica. Nao substitui avaliacao odontologica profissional.
 
-`xray-mouth` helps researchers and developers inspect raster image collections, detect basic quality and filename-privacy risks, create machine-readable dataset reports, and write de-identified DICOM copies before collaboration.
+## Resultado visual
 
-> [!IMPORTANT]
-> This project is research software. It is **not a medical device**, does not provide diagnoses, and must not be used to make clinical decisions. De-identification is context-dependent; review outputs against your institution's policies before sharing data.
+- Quadro fixo de 1672 x 958 pixels.
+- Oito molduras laterais de 280 x 180 pixels.
+- Oito molduras centrais de 185 x 270 pixels.
+- Logo Green Smile com proporcao preservada.
+- Cabecalho com paciente, exame e data.
+- PDF com o mesmo layout exibido na previa.
 
-## Why this project exists
+## Uso facil no Windows
 
-Oral-imaging experiments often begin with one-off notebooks and undocumented preprocessing. That makes results difficult to reproduce and increases the risk of accidentally sharing identifiers. This project starts with the less glamorous but essential foundation: inspection, provenance, privacy checks, and documented workflows.
+1. Baixe ou clone o repositorio.
+2. Coloque as 16 imagens na pasta `xray`.
+3. Nomeie os arquivos com prefixos de `01_` ate `16_`.
+4. Execute `executar_relatorio.bat`.
 
-## Features
+O BAT:
 
-- Deterministic JSON inventory for PNG, JPEG, TIFF, BMP, and DICOM datasets
-- SHA-256 provenance hashes for every discovered file
-- Basic contrast, saturation, and edge-energy metrics for raster images
-- Warnings for filenames that may contain patient identifiers
-- Conservative DICOM de-identification that writes a new file and removes private tags
-- No image or patient data is uploaded anywhere
+- detecta e recria uma `.venv` copiada de outro computador;
+- procura Python 3.11 ou superior;
+- tenta instalar Python 3.12 pelo `winget` quando necessario;
+- instala as dependencias na `.venv` local;
+- instala o Chromium usado pelo Playwright;
+- gera o relatorio e abre o PDF.
 
-## Installation
+A primeira execucao precisa de acesso a internet. Nao copie a pasta `.venv` entre computadores.
 
-```bash
-git clone https://github.com/douglasncst/xray-mouth.git
-cd xray-mouth
+## Saida
+
+Cada execucao cria uma pasta datada em `relatorio` contendo:
+
+- `periapical_series.pdf`
+- `periapical_series_preview.png`
+- `montagem.html`
+- `report.txt`
+
+## Desenvolvimento
+
+```powershell
 python -m venv .venv
-python -m pip install -e .
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.venv\Scripts\python.exe -m playwright install chromium
+.venv\Scripts\python.exe -m pytest
+.venv\Scripts\python.exe -m ruff check .
 ```
 
-## Quick start
+O projeto tambem preserva os utilitarios existentes de inspecao de datasets e desidentificacao
+DICOM. Consulte `src/xray_mouth` para esses modulos.
 
-Inspect one image or a directory:
+## Privacidade
 
-```bash
-xray-mouth inspect samples/example.png
-xray-mouth inspect data/ --recursive --output report.json
-```
+- Nao inclua radiografias reais no Git.
+- Nao inclua dados identificaveis de pacientes no repositorio.
+- Os arquivos de entrada nunca sao modificados.
+- O processamento do relatorio ocorre no computador local.
 
-Write a de-identified DICOM copy:
-
-```bash
-xray-mouth anonymize input.dcm output/anonymous.dcm
-```
-
-The source file is never overwritten.
-
-Create a complete demonstration using generated data only:
-
-```bash
-xray-mouth demo demo-output
-```
-
-This creates three synthetic images plus a `report.json`. No download, patient data, or network connection is required. See the [demo walkthrough](docs/DEMO.md).
-
-## Example report
-
-```json
-{
-  "schema_version": "1.0",
-  "file_count": 1,
-  "privacy_warning_count": 0,
-  "items": [
-    {
-      "path": "example.png",
-      "format": "PNG",
-      "width": 1024,
-      "height": 512,
-      "mean_intensity": 91.7,
-      "warnings": []
-    }
-  ]
-}
-```
-
-## Development
-
-```bash
-python -m pip install -e ".[dev]"
-ruff check .
-pytest
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and the [security policy](SECURITY.md).
-
-If you test `xray-mouth` in a research or education workflow, please share a privacy-safe
-[adoption report](docs/ADOPTION.md). Reports help prioritize compatibility work and demonstrate
-real-world utility without collecting clinical data.
-
-## Project status
-
-Version `0.1.0` is an alpha research-tooling release. The current scope is dataset preparation and privacy-aware inspection, not the full RXFlow acquisition application and not diagnostic AI. Feedback through GitHub issues is welcome.
-
-## Privacy and responsible use
-
-- Work only with data you are authorized to use.
-- Keep raw clinical data outside the repository.
-- Treat automated de-identification as one control in a broader review process.
-- Do not use repository outputs for diagnosis, treatment, or emergency decisions.
-- Report security or privacy concerns through the process in [SECURITY.md](SECURITY.md).
-
-## License
-
-MIT © Douglas Casty. Third-party datasets and images retain their own licenses and are not included.
-
-For research references, use the metadata in [CITATION.cff](CITATION.cff).
+Licenca MIT. Consulte [LICENSE](LICENSE).
