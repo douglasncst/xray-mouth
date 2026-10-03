@@ -37,7 +37,7 @@ echo Instalando ou atualizando dependencias...
 "%PYTHON%" -m pip install -e . || goto :error
 echo Verificando navegador do gerador PDF...
 "%PYTHON%" -m playwright install chromium || goto :error
-echo Gerando relatorio das 16 imagens da pasta xray...
+echo Gerando relatorio das 14 imagens da pasta xray...
 "%PYTHON%" gerar_relatorio.py || goto :error
 pause
 exit /b 0
@@ -58,4 +58,3 @@ exit /b 1
 echo Ocorreu um erro. Veja as mensagens acima.
 pause
 exit /b 1
-

@@ -12,31 +12,36 @@ from pathlib import Path
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
-CANVAS_WIDTH = 1672
-CANVAS_HEIGHT = 958
+CANVAS_WIDTH = 1600
+CANVAS_HEIGHT = 1278
 SUPPORTED = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp"}
+
+# Geometry reproduced from the new 14-film clinical reference layout.
+# Patient data from the reference image is intentionally not embedded in the project.
 SLOTS = {
-    1: (60, 143, 280, 180),
-    2: (60, 339, 280, 180),
-    8: (60, 535, 280, 180),
-    9: (60, 727, 280, 180),
-    3: (429, 202, 185, 270),
-    4: (638, 202, 185, 270),
-    15: (847, 202, 185, 270),
-    5: (1056, 202, 185, 270),
-    10: (429, 565, 185, 270),
-    11: (638, 565, 185, 270),
-    16: (847, 565, 185, 270),
-    12: (1056, 565, 185, 270),
-    6: (1332, 143, 280, 180),
-    7: (1332, 339, 280, 180),
-    13: (1332, 535, 280, 180),
-    14: (1332, 727, 280, 180),
+    # Patient-right side: four landscape films.
+    1: (63, 126, 252, 190),
+    6: (63, 346, 252, 190),
+    7: (63, 567, 252, 190),
+    10: (63, 787, 252, 190),
+    # Maxillary anterior region: three portrait films.
+    2: (441, 251, 190, 253),
+    3: (705, 251, 190, 253),
+    4: (964, 251, 190, 253),
+    # Mandibular anterior region: three portrait films.
+    11: (441, 629, 190, 253),
+    12: (705, 629, 190, 253),
+    13: (964, 629, 190, 253),
+    # Patient-left side: four landscape films.
+    5: (1279, 126, 252, 190),
+    8: (1279, 346, 252, 190),
+    9: (1279, 567, 252, 190),
+    14: (1279, 787, 252, 190),
 }
 
 
 def find_images(directory: Path) -> dict[int, Path]:
-    """Map two-digit filename prefixes to the 16 fixed report slots."""
+    """Map two-digit filename prefixes to the 14 fixed report slots."""
 
     mapped: dict[int, Path] = {}
     for path in sorted(directory.iterdir()):
@@ -79,30 +84,24 @@ def build_html(images: dict[int, Path], logo_path: Path) -> str:
 html, body {{ margin:0; width:{CANVAS_WIDTH}px; height:{CANVAS_HEIGHT}px; overflow:hidden; }}
 body {{ background:#000; font-family:Arial,Helvetica,sans-serif; }}
 .mount {{ position:relative; width:{CANVAS_WIDTH}px; height:{CANVAS_HEIGHT}px; background:#000; }}
-.header {{ position:absolute; inset:0 0 auto 0; height:125px; overflow:hidden;
-  background:linear-gradient(90deg,#04362a 0 31%,#021f19 31% 100%);
-  border-bottom:2px solid #f16f22; }}
-.logo {{ position:absolute; left:60px; top:7px; width:445px; height:108px; object-fit:contain; }}
-.divider {{ position:absolute; left:510px; top:24px; width:3px; height:75px; background:#f16f22; }}
-.patient {{ position:absolute; left:548px; top:18px; color:#fff; font-size:24px;
-  line-height:1.28; font-weight:700; white-space:nowrap; }}
-.patient strong {{ color:#f16f22; }}
-.dots {{ position:absolute; right:118px; top:9px; width:300px; height:92px;
-  background:radial-gradient(circle,#f16f22 0 2.5px,transparent 3px) 0 0/15px 15px;
-  transform:skewX(-18deg); opacity:.95; mask-image:linear-gradient(90deg,transparent,#000); }}
-.wave {{ position:absolute; right:-15px; top:72px; width:420px; height:70px;
-  border-top:6px solid #f16f22; border-radius:50%; transform:rotate(-4deg);
-  box-shadow:0 9px 0 #064c39,0 18px 0 #043c30,0 27px 0 #032f27; }}
-.film {{ position:absolute; overflow:hidden; border:1.5px solid #ddd;
-  border-radius:25px; background:#000; }}
+
+.header {{ position:absolute; left:63px; top:38px; height:78px; width:860px; }}
+.logo {{ position:absolute; left:0; top:0; width:320px; height:66px; object-fit:contain;
+  object-position:left center; }}
+.patient {{ position:absolute; left:342px; top:5px; color:#fff; font-size:19px;
+  line-height:1.28; font-weight:400; white-space:nowrap; }}
+.patient strong {{ font-weight:600; }}
+
+.film {{ position:absolute; overflow:hidden; border-radius:28px; background:#000; }}
 .film img {{ width:100%; height:100%; display:block; object-fit:cover;
   object-position:center; filter:grayscale(1); }}
 </style></head><body><main class="mount">
 <header class="header"><img class="logo" src="{data_uri(logo_path)}" alt="Green Smile">
-<div class="divider"></div><div class="patient">
+<div class="patient">
 Paciente: <strong>Douglas do Nascimento Castilho</strong><br>
-Exame: <strong>Série periapical</strong><br>Data: <strong>01/10/2026</strong></div>
-<div class="dots"></div><div class="wave"></div></header>
+Exame: <strong>Série periapical</strong><br>
+Data: <strong>01/10/2026</strong>
+</div></header>
 {''.join(frames)}
 </main></body></html>"""
 
@@ -137,7 +136,7 @@ def generate(project: Path) -> Path:
         "Green Smile - Serie periapical\n"
         "Paciente: Douglas do Nascimento Castilho\n"
         "Data: 01/10/2026\n"
-        "Imagens: 16\n"
+        "Imagens: 14\n"
         "Arquivos originais: nao modificados\n",
         encoding="utf-8",
     )
@@ -178,4 +177,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
