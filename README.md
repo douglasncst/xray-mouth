@@ -10,20 +10,19 @@ localmente; nenhuma imagem e enviada para servicos externos.
 
 ## Resultado visual
 
-- Quadro fixo de 1600 x 1278 pixels sobre fundo preto.
-- Quatro radiografias horizontais em cada lateral, com 252 x 190 pixels.
-- Tres radiografias verticais na regiao superior central e tres na inferior central,
-  com 190 x 253 pixels.
-- Distribuicao inspirada no novo modelo clinico de referencia enviado para o projeto.
-- Logo Green Smile no topo esquerdo e identificacao do exame em branco sobre o fundo preto.
+- Quadro final fixo de 1672 x 941 pixels sobre fundo preto.
+- Quatro radiografias horizontais em cada lateral e tres radiografias verticais em cada bloco central.
+- Geometria medida a partir do modelo final Green Smile aprovado.
+- Cabecalho verde/preto com detalhes laranja, logo Green Smile sobre a forma branca organica e divisor laranja.
+- Identificacao no cabecalho com Paciente, Data do dia e Dr. Victor Greenhalgh.
 - PDF com o mesmo layout exibido na previa.
 - Nenhum dado de paciente da imagem de referencia foi incorporado ao repositorio.
 
 ## Uso facil no Windows
 
 1. Baixe ou clone o repositorio.
-2. Coloque as 14 imagens na pasta `xray`.
-3. Nomeie os arquivos com prefixos de `01_` ate `14_`.
+2. Dentro de `xray`, crie uma pasta com o nome do paciente, por exemplo `xray/Francisco Bispo De Souza/`.
+3. Coloque as 14 imagens nessa pasta e nomeie os arquivos com prefixos de `01_` ate `14_`.
 4. Execute `executar_relatorio.bat`.
 
 O BAT:
@@ -46,8 +45,10 @@ A montagem usa os seguintes grupos:
 - centro inferior: `11`, `12`, `13`;
 - lateral direita: `05`, `08`, `09`, `14`.
 
-A atribuicao continua sendo feita exclusivamente pelo prefixo do nome do arquivo. O programa
-nao tenta identificar dentes ou regioes anatomicas a partir dos pixels.
+O nome do paciente e obtido automaticamente pelo nome da pasta dentro de `xray`. A data usada no
+cabecalho e a data atual no horario de Sao Paulo. A atribuicao das radiografias continua sendo feita
+exclusivamente pelo prefixo do nome do arquivo; o programa nao tenta identificar dentes ou regioes
+anatomicas a partir dos pixels.
 
 ## Saida
 
