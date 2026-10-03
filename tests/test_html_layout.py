@@ -1,8 +1,18 @@
+import importlib.util
 from pathlib import Path
 
 from PIL import Image
 
-from gerar_relatorio import CANVAS_HEIGHT, CANVAS_WIDTH, SLOTS, find_images
+MODULE_PATH = Path(__file__).resolve().parents[1] / "gerar_relatorio.py"
+SPEC = importlib.util.spec_from_file_location("gerar_relatorio", MODULE_PATH)
+assert SPEC is not None and SPEC.loader is not None
+gerar_relatorio = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(gerar_relatorio)
+
+CANVAS_HEIGHT = gerar_relatorio.CANVAS_HEIGHT
+CANVAS_WIDTH = gerar_relatorio.CANVAS_WIDTH
+SLOTS = gerar_relatorio.SLOTS
+find_images = gerar_relatorio.find_images
 
 
 def test_layout_has_14_unique_bounded_slots() -> None:
