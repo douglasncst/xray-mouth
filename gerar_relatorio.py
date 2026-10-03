@@ -1,5 +1,8 @@
 """Generate the final Green Smile 14-film radiographic report locally."""
 
+# Long lines inside the embedded SVG/CSS are intentional and preserve the approved layout.
+# ruff: noqa: E501
+
 from __future__ import annotations
 
 import base64
