@@ -21,8 +21,8 @@ localmente; nenhuma imagem e enviada para servicos externos.
 ## Uso facil no Windows
 
 1. Baixe ou clone o repositorio.
-2. Dentro de `xray`, crie uma pasta com o nome do paciente, por exemplo `xray/Francisco Bispo De Souza/`.
-3. Coloque as 14 imagens nessa pasta e nomeie os arquivos com prefixos de `01_` ate `14_`.
+2. Para testar, use o exemplo anonimizado e autorizado em `xray/Caso_Anonimo/`. Para um exame local, crie outra pasta dentro de `xray`.
+3. Coloque exatamente 14 imagens na pasta local, com prefixos de `01_` ate `14_`.
 4. Execute `executar_relatorio.bat`.
 
 O BAT:
@@ -50,6 +50,10 @@ cabecalho e a data atual no horario de Sao Paulo. A atribuicao das radiografias 
 exclusivamente pelo prefixo do nome do arquivo; o programa nao tenta identificar dentes ou regioes
 anatomicas a partir dos pixels.
 
+As subpastas de `xray` sao ignoradas pelo Git por padrao. A unica excecao versionada e
+`xray/Caso_Anonimo/`, um conjunto explicitamente autorizado, regravado sem metadados e publicado
+sob um identificador generico. Nao force a inclusao de outros exames reais em repositorios publicos.
+
 ## Saida
 
 Cada execucao cria uma pasta datada em `relatorio` contendo:
@@ -74,7 +78,7 @@ DICOM. Consulte `src/xray_mouth` para esses modulos.
 
 ## Privacidade
 
-- Nao inclua radiografias reais no Git.
+- Nao inclua outras radiografias reais no Git sem desidentificacao e autorizacao explicita.
 - Nao inclua dados identificaveis de pacientes no repositorio.
 - Os arquivos de entrada nunca sao modificados.
 - O processamento do relatorio ocorre no computador local.
