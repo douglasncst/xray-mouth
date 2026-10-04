@@ -28,16 +28,19 @@ if not defined PYTHON (
         if not defined BOOTSTRAP py -3.12 --version >nul 2>&1 && set "BOOTSTRAP=py -3.12"
         if not defined BOOTSTRAP goto :restart_required
     )
-    echo Criando uma .venv propria para este computador...
-    %BOOTSTRAP% -m venv .venv || goto :error
-    set "PYTHON=%VENV_PYTHON%"
 )
 
+if defined PYTHON goto :install
+echo Criando uma .venv propria para este computador...
+%BOOTSTRAP% -m venv .venv || goto :error
+set "PYTHON=%VENV_PYTHON%"
+
+:install
 echo Instalando ou atualizando dependencias...
 "%PYTHON%" -m pip install -e . || goto :error
 echo Verificando navegador do gerador PDF...
 "%PYTHON%" -m playwright install chromium || goto :error
-echo Gerando relatorio das 14 imagens da pasta xray...
+echo Gerando um relatorio para cada paciente da pasta xray...
 "%PYTHON%" gerar_relatorio.py || goto :error
 pause
 exit /b 0

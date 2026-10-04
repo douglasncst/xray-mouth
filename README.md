@@ -1,29 +1,50 @@
 # XRay Mouth
 
+Versao **0.2.0** — layout Green Smile aprovado em 03/10/2026.
+
 Gerador local de montagem radiografica Green Smile para series periapicais.
 
-O projeto recebe 14 radiografias numeradas, monta o quadro clinico com medidas controladas
-pixel a pixel e gera PDF, previa PNG, HTML e relatorio textual. Todo o processamento acontece
-localmente; nenhuma imagem e enviada para servicos externos.
+O projeto recebe pastas de pacientes com 14 radiografias numeradas, monta um quadro clinico
+por paciente com medidas controladas pixel a pixel e gera PDF, previa PNG, HTML e relatorio
+textual. Todo o processamento acontece localmente; nenhuma imagem e enviada para servicos
+externos.
 
 > Ferramenta experimental e nao diagnostica. Nao substitui avaliacao odontologica profissional.
 
 ## Resultado visual
 
-- Quadro final fixo de 1672 x 941 pixels sobre fundo preto.
-- Quatro radiografias horizontais em cada lateral e tres radiografias verticais em cada bloco central.
-- Geometria medida a partir do modelo final Green Smile aprovado.
-- Cabecalho verde/preto com detalhes laranja, logo Green Smile sobre a forma branca organica e divisor laranja.
-- Identificacao no cabecalho com Paciente, Data do dia e Dr. Victor Greenhalgh.
+- Quadro horizontal de 1672 x 941 pixels sobre fundo preto, conforme a referencia.
+- Quatro radiografias horizontais em cada lateral, com aproximadamente 240 x 177 pixels.
+- Tres radiografias verticais na regiao superior central e tres na inferior central,
+  com aproximadamente 186 x 241 pixels e cantos arredondados.
+- Cabecalho grafico Green Smile extraido da referencia, sem a identificacao do paciente.
+- Identificacao com rotulos brancos e valores laranja. O nome vem da pasta do paciente;
+  a data e a da geracao. O profissional padrao e Victor Greenhalgh e pode ser definido
+  pela variavel de ambiente `XRAY_MOUTH_DOCTOR`.
 - PDF com o mesmo layout exibido na previa.
 - Nenhum dado de paciente da imagem de referencia foi incorporado ao repositorio.
 
 ## Uso facil no Windows
 
+O exemplo anonimizado e autorizado em `xray/Caso_Anonimo/` continua disponivel
+para testar. A geracao processa cada pasta de paciente separadamente.
+
 1. Baixe ou clone o repositorio.
-2. Para testar, use o exemplo anonimizado e autorizado em `xray/Caso_Anonimo/`. Para um exame local, crie outra pasta dentro de `xray`.
-3. Coloque exatamente 14 imagens na pasta local, com prefixos de `01_` ate `14_`.
+2. Dentro de `xray`, crie uma subpasta com o nome de cada paciente.
+3. Coloque as 14 imagens do paciente nessa subpasta e nomeie-as com prefixos de `01_` ate `14_`.
 4. Execute `executar_relatorio.bat`.
+
+```text
+xray/
+├── Francisco Bispo De Souza/
+│   ├── 01_radiografia.jpg
+│   ├── ...
+│   └── 14_radiografia.jpg
+└── Maria Silva/
+    ├── 01_radiografia.jpg
+    ├── ...
+    └── 14_radiografia.jpg
+```
 
 O BAT:
 
@@ -36,27 +57,34 @@ O BAT:
 
 A primeira execucao precisa de acesso a internet. Nao copie a pasta `.venv` entre computadores.
 
+O layout aprovado e unico: o BAT e o comando instalado usam o mesmo gerador.
+Tambem e possivel executar na pasta do projeto:
+
+```powershell
+.venv\Scripts\xray-mouth.exe report .
+```
+
+Para gerar sem abrir janelas, acrescente `--no-open`. Consulte [o contrato do layout](docs/LAYOUT.md)
+para as coordenadas exatas, a ordem dos arquivos e os criterios de verificacao.
+
 ## Posicoes das 14 imagens
 
 A montagem usa os seguintes grupos:
 
-- lateral esquerda: `01`, `06`, `07`, `10`;
-- centro superior: `02`, `03`, `04`;
-- centro inferior: `11`, `12`, `13`;
-- lateral direita: `05`, `08`, `09`, `14`.
+- lateral esquerda: `01`, `02`, `08`, `09`;
+- centro superior: `03`, `04`, `05`;
+- centro inferior: `10`, `11`, `12`;
+- lateral direita: `06`, `07`, `13`, `14`.
 
-O nome do paciente e obtido automaticamente pelo nome da pasta dentro de `xray`. A data usada no
-cabecalho e a data atual no horario de Sao Paulo. A atribuicao das radiografias continua sendo feita
-exclusivamente pelo prefixo do nome do arquivo; o programa nao tenta identificar dentes ou regioes
-anatomicas a partir dos pixels.
+A atribuicao continua sendo feita exclusivamente pelo prefixo do nome do arquivo. O programa
+nao tenta identificar dentes ou regioes anatomicas a partir dos pixels.
 
-As subpastas de `xray` sao ignoradas pelo Git por padrao. A unica excecao versionada e
-`xray/Caso_Anonimo/`, um conjunto explicitamente autorizado, regravado sem metadados e publicado
-sob um identificador generico. Nao force a inclusao de outros exames reais em repositorios publicos.
+Use a ordem anatomica de nomes descrita em [xray/README.md](xray/README.md).
 
 ## Saida
 
-Cada execucao cria uma pasta datada em `relatorio` contendo:
+Cada execucao cria uma pasta datada por paciente em `relatorio`, usando o nome da subpasta,
+contendo:
 
 - `periapical_series.pdf`
 - `periapical_series_preview.png`
@@ -71,6 +99,7 @@ python -m venv .venv
 .venv\Scripts\python.exe -m playwright install chromium
 .venv\Scripts\python.exe -m pytest
 .venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m build
 ```
 
 O projeto tambem preserva os utilitarios existentes de inspecao de datasets e desidentificacao
@@ -78,7 +107,7 @@ DICOM. Consulte `src/xray_mouth` para esses modulos.
 
 ## Privacidade
 
-- Nao inclua outras radiografias reais no Git sem desidentificacao e autorizacao explicita.
+- Nao inclua radiografias reais no Git.
 - Nao inclua dados identificaveis de pacientes no repositorio.
 - Os arquivos de entrada nunca sao modificados.
 - O processamento do relatorio ocorre no computador local.

@@ -1,19 +1,16 @@
-import importlib.util
 from pathlib import Path
 
 from PIL import Image
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "gerar_relatorio.py"
-SPEC = importlib.util.spec_from_file_location("gerar_relatorio", MODULE_PATH)
-assert SPEC is not None and SPEC.loader is not None
-gerar_relatorio = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(gerar_relatorio)
+from xray_mouth import report as gerar_relatorio
 
 CANVAS_HEIGHT = gerar_relatorio.CANVAS_HEIGHT
 CANVAS_WIDTH = gerar_relatorio.CANVAS_WIDTH
 SLOTS = gerar_relatorio.SLOTS
+build_html = gerar_relatorio.build_html
 find_images = gerar_relatorio.find_images
-locate_exam = gerar_relatorio.locate_exam
+patient_directories = gerar_relatorio.patient_directories
+safe_output_name = gerar_relatorio.safe_output_name
 
 
 def test_layout_has_14_unique_bounded_slots() -> None:
@@ -28,28 +25,39 @@ def test_layout_has_14_unique_bounded_slots() -> None:
         assert top + height <= CANVAS_HEIGHT
 
 
-def test_approved_reference_positions() -> None:
-    assert [SLOTS[number] for number in (1, 6, 7, 10)] == [
-        (174, 145, 240, 177),
-        (174, 336, 240, 180),
-        (174, 531, 240, 179),
-        (174, 724, 240, 176),
+def test_reference_groups_use_expected_dimensions() -> None:
+    for number in (1, 2, 6, 7, 8, 9, 13, 14):
+        width, height = SLOTS[number][2:]
+        assert width in (240, 242)
+        assert height in (175, 176, 178)
+    for number in (3, 4, 5, 10, 11, 12):
+        width, height = SLOTS[number][2:]
+        assert width in (185, 186)
+        assert height == 241
+
+
+def test_reference_group_positions() -> None:
+    assert [SLOTS[number][:2] for number in (1, 2, 8, 9)] == [
+        (174, 145),
+        (174, 337),
+        (174, 532),
+        (174, 725),
     ]
-    assert [SLOTS[number] for number in (2, 3, 4)] == [
-        (497, 261, 188, 240),
-        (734, 261, 188, 242),
-        (974, 261, 187, 242),
+    assert [SLOTS[number][:2] for number in (3, 4, 5)] == [
+        (498, 262),
+        (735, 262),
+        (975, 262),
     ]
-    assert [SLOTS[number] for number in (11, 12, 13)] == [
-        (496, 591, 189, 242),
-        (734, 591, 188, 242),
-        (974, 591, 186, 242),
+    assert [SLOTS[number][:2] for number in (10, 11, 12)] == [
+        (498, 591),
+        (735, 591),
+        (975, 591),
     ]
-    assert [SLOTS[number] for number in (5, 8, 9, 14)] == [
-        (1191, 145, 243, 177),
-        (1192, 336, 242, 180),
-        (1193, 531, 241, 179),
-        (1192, 724, 242, 177),
+    assert [SLOTS[number][:2] for number in (6, 7, 13, 14)] == [
+        (1192, 145),
+        (1192, 337),
+        (1192, 532),
+        (1192, 725),
     ]
 
 
@@ -59,11 +67,34 @@ def test_find_images_maps_all_prefixes(tmp_path: Path) -> None:
     assert set(find_images(tmp_path)) == set(range(1, 15))
 
 
-def test_locate_exam_uses_patient_folder_name(tmp_path: Path) -> None:
-    xray = tmp_path / "xray"
-    patient = xray / "Francisco Bispo De Souza"
-    patient.mkdir(parents=True)
-    Image.new("L", (20, 20), 128).save(patient / "01_teste.jpg")
-    exam_dir, patient_name = locate_exam(xray)
-    assert exam_dir == patient
-    assert patient_name == "Francisco Bispo De Souza"
+def test_patient_directories_uses_immediate_folder_names(tmp_path: Path) -> None:
+    (tmp_path / "Maria Silva").mkdir()
+    (tmp_path / "Francisco Bispo De Souza").mkdir()
+    (tmp_path / "README.md").write_text("ignored", encoding="utf-8")
+
+    assert [path.name for path in patient_directories(tmp_path)] == [
+        "Francisco Bispo De Souza",
+        "Maria Silva",
+    ]
+
+
+def test_patient_name_and_date_are_rendered_safely(tmp_path: Path) -> None:
+    logo = tmp_path / "logo.png"
+    Image.new("RGB", (1, 1)).save(logo)
+    images: dict[int, Path] = {}
+    for number in range(1, 15):
+        path = tmp_path / f"{number:02d}.jpg"
+        Image.new("L", (1, 1)).save(path)
+        images[number] = path
+
+    document = build_html(images, logo, "Ana & <Silva>", "03/10/2026")
+
+    assert "Ana &amp; &lt;Silva&gt;" in document
+    assert "03/10/2026" in document
+    assert "Douglas do Nascimento Castilho" not in document
+
+
+def test_safe_output_name_replaces_windows_reserved_characters() -> None:
+    assert safe_output_name('Paciente: Nome/Com\\Caracteres?') == (
+        "Paciente_ Nome_Com_Caracteres_"
+    )

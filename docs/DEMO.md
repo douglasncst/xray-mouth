@@ -1,5 +1,10 @@
 # Synthetic demo
 
+For the approved Green Smile montage, use `xray-mouth report PROJECT --no-open`.
+Its layout is documented in [LAYOUT.md](LAYOUT.md). The rendered regression test
+`tests/test_report_render.py` creates all 14 synthetic films and verifies the PNG and PDF.
+The `demo` command below remains the separate dataset-inspection example.
+
 The demo is designed so anyone can evaluate `xray-mouth` without finding, downloading, or handling clinical data.
 
 ## Run it

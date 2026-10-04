@@ -11,15 +11,22 @@ from . import __version__
 from .analysis import dataset_report
 from .demo import create_demo
 from .dicom import anonymize_file
+from .report import main as report_main
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="xray-mouth",
-        description="Inspect and de-identify dental X-ray datasets for research workflows.",
+        description="Generate Green Smile reports, inspect images and de-identify DICOM files.",
     )
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    report_parser = subparsers.add_parser(
+        "report", help="Generate the approved Green Smile montage"
+    )
+    report_parser.add_argument("directory", type=Path, nargs="?", default=Path.cwd())
+    report_parser.add_argument("--no-open", action="store_true", help="Do not open PDFs or dialogs")
 
     inspect_parser = subparsers.add_parser("inspect", help="Generate a JSON dataset report")
     inspect_parser.add_argument("path", type=Path)
@@ -39,6 +46,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "report":
+        return report_main(project=args.directory.resolve(), open_pdf=not args.no_open)
     if args.command == "inspect":
         report = dataset_report(args.path, recursive=args.recursive)
         payload = json.dumps(report, indent=2, ensure_ascii=False)

@@ -8,8 +8,8 @@ authors:
 repository-code: "https://github.com/douglasncst/xray-mouth"
 url: "https://github.com/douglasncst/xray-mouth"
 license: MIT
-version: 0.1.0
-date-released: 2026-10-01
+version: 0.2.0
+date-released: 2026-10-03
 keywords:
   - dental imaging
   - DICOM

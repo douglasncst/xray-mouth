@@ -9,6 +9,8 @@
 
 ## 0.2 — Reproducible pipelines
 
+- [x] Approved Green Smile 14-film montage, shared Windows/CLI generator and packaged branding
+- [x] Rendered report regression tests for PNG and PDF output
 - [ ] Configurable preprocessing manifests
 - [ ] Dataset-level duplicate detection
 - [ ] Structured validation profiles

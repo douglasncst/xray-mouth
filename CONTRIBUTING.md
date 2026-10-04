@@ -15,11 +15,17 @@ Thank you for helping make dental-imaging research workflows safer and more repr
 ```bash
 python -m venv .venv
 python -m pip install -e ".[dev]"
+python -m playwright install chromium
 ruff check .
 pytest
+python -m build
 ```
 
 ## Scope
+
+The approved report layout is specified in [docs/LAYOUT.md](docs/LAYOUT.md).
+Keep the Windows entry point, installed CLI and packaged header aligned. Run the rendered
+report tests before changing geometry, typography, image fitting or branding.
 
 Good first contributions include format support, documentation, test fixtures made from synthetic data, accessibility improvements, and reproducibility tooling. Diagnostic claims and patient-derived samples are out of scope.
 
